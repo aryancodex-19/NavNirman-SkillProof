@@ -12,7 +12,7 @@ export default function Loading() {
         </div>
       </div>
       <div>
-        <h3 className="font-bold text-white text-sm">Loading CareerOS...</h3>
+        <h3 className="font-bold text-white text-sm">Loading SkillProof...</h3>
         <p className="text-xs text-gray-400 mt-1">Preparing your workspace</p>
       </div>
     </div>

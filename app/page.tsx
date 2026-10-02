@@ -11,7 +11,7 @@ import Testimonials from "@/components/home/Testimonials";
 import CTA from "@/components/home/CTA";
 
 export const metadata = {
-  title: "SkillProof / CareerOS | AI-Powered Student Career Workspace",
+  title: "SkillProof | Evidence-Based Skill Verification & Job Matching",
   description:
     "From learning to hiring, SkillProof is the unified AI workspace that matches students to internships, builds resumes, audits GitHub activity, scans ATS scores, and coaches mock voice interviews.",
 };
