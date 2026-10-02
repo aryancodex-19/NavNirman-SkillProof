@@ -1,7 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/db/prisma";
+import SpinningLogo from "@/components/ui/SpinningLogo";
 import AnimatedHero from "@/components/home/AnimatedHero";
 import RealStats from "@/components/home/RealStats";
 import FeaturesGrid from "@/components/home/FeaturesGrid";
@@ -37,9 +38,9 @@ export default async function HomePage() {
       <nav className="fixed top-0 w-full z-50 bg-black/40 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 via-purple-500 to-indigo-600 text-white shadow-[0_0_20px_rgba(168,85,247,0.5)]">
-              <Sparkles className="h-4 w-4" />
-            </div>
+            <Link href="/" aria-label="SkillProof home">
+              <SpinningLogo size={32} />
+            </Link>
             <span className="text-lg font-extrabold tracking-tight text-white">
               Skill<span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">Proof</span>
             </span>

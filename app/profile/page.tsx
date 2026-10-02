@@ -38,12 +38,12 @@ export default async function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Sidebar — fixed on desktop, drawer on mobile */}
+    <div className="min-h-screen flex">
+      {/* Sidebar — fixed rail on desktop, drawer on mobile */}
       <Sidebar />
 
-      {/* Main content area — offset by sidebar width on desktop */}
-      <div className="lg:pl-64 transition-all duration-300">
+      {/* Main content area — width offset comes from the sidebar spacer */}
+      <div className="flex-1 min-w-0 transition-all duration-300">
         <DashboardHeader />
 
         {/* Main Content */}

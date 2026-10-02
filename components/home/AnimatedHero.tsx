@@ -60,13 +60,23 @@ export default function AnimatedHero() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
         >
           <Link href="/sign-up" passHref>
-            <AnimatedButton size="lg" variant="primary" className="w-full sm:w-auto font-bold px-8">
-              <span>Get Started Free</span>
-              <ArrowRight className="h-4 w-4 ml-1" />
+            <AnimatedButton
+              size="lg"
+              variant="primary"
+              className="w-full sm:w-auto font-bold px-8 flex items-center gap-2"
+            >
+              <span className="inline-flex items-center gap-2">
+                <span>Get Started Free</span>
+                <ArrowRight className="h-4 w-4" />
+              </span>
             </AnimatedButton>
           </Link>
           <Link href="/sign-in" passHref>
-            <AnimatedButton size="lg" variant="secondary" className="w-full sm:w-auto font-bold px-8">
+            <AnimatedButton
+              size="lg"
+              variant="secondary"
+              className="w-full sm:w-auto font-bold px-8 bg-white text-black hover:bg-gray-100 shadow-[0_0_20px_rgba(139,92,246,0.35)] hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] hover:border-transparent"
+            >
               <span>Access Workspace</span>
             </AnimatedButton>
           </Link>

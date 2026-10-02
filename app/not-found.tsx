@@ -4,7 +4,7 @@ import { HelpCircle } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-6 text-center p-6">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-6 text-center p-6">
       <div className="relative">
         <div className="absolute inset-0 rounded-3xl bg-purple-500/20 blur-2xl" />
         <div className="relative p-5 bg-white/[0.03] backdrop-blur-xl text-purple-300 rounded-3xl border border-white/10 shadow-[0_8px_32px_rgba(139,92,246,0.15)]">

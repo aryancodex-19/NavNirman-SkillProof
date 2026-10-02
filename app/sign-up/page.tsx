@@ -31,7 +31,7 @@ export default function SignUpPage() {
         </div>
 
         {/* Clerk SignUp in Glass Card */}
-        <div className="bg-black/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-6 shadow-[0_8px_32px_rgba(139,92,246,0.2)] min-h-[420px] flex items-center justify-center">
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-[0_8px_32px_rgba(139,92,246,0.2)] min-h-[420px] flex items-center justify-center">
           {mounted ? (
             <SignUp
               routing="hash"
