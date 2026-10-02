@@ -67,7 +67,7 @@ Focus on skills that appear on LinkedIn's endorsement system and are searched by
     }
 
     const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -85,3 +85,4 @@ Focus on skills that appear on LinkedIn's endorsement system and are searched by
     return NextResponse.json({ error: error.message || "Failed to optimize" }, { status: 500 });
   }
 }
+

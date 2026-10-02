@@ -49,7 +49,7 @@ Return ONLY valid JSON in this exact format:
 Score all ${MOCK_INTERNSHIPS.length} internships. Be strict but fair.`;
 
     const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       messages: [
         { role: "system", content: "You are a job matching AI. Return only valid JSON objects. No markdown." },
         { role: "user", content: prompt },
@@ -100,3 +100,4 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

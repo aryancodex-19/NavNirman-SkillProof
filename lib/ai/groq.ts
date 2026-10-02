@@ -37,7 +37,7 @@ export async function analyzeWithGroq(jobDescription: string, resumeText: string
         { role: "user", content: prompt }
       ],
       // ✅ WORKING MODELS - Try these:
-      model: "llama-3.3-70b-versatile",  // Best, most capable
+      model: "openai/gpt-oss-120b",  // Best, most capable
       // model: "llama-3.1-70b-versatile", // Alternative
       // model: "mixtral-8x7b-32768",      // Another option
       // model: "gemma2-9b-it",             // Lighter, faster

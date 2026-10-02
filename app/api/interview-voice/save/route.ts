@@ -64,7 +64,7 @@ Return ONLY valid JSON:
 }`;
 
     const summaryRes = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       messages: [
         { role: "system", content: "You are an expert hiring manager. Return only valid JSON. No markdown." },
         { role: "user", content: summaryPrompt },
@@ -139,3 +139,4 @@ export async function GET(_req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

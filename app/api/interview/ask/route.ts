@@ -27,7 +27,7 @@ Return ONLY valid JSON in this exact format:
 }`;
 
     const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       messages: [
         { role: "system", content: "You are an expert technical interviewer. Generate realistic, high-quality interview questions. Return only valid JSON." },
         { role: "user", content: prompt },
@@ -45,3 +45,4 @@ Return ONLY valid JSON in this exact format:
     return NextResponse.json({ error: error.message || "Failed to generate question" }, { status: 500 });
   }
 }
+
