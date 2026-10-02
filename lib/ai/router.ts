@@ -73,6 +73,37 @@ export async function routeAI(task: TaskType, input: any) {
         temperature: 0.5,
       });
 
+    case "ats_score":
+      if (gemini) {
+        try {
+          return await withTransientRetry(
+            async () => {
+              const model = gemini.getGenerativeModel({
+                model: "gemini-3.8-flash",
+                generationConfig: { responseMimeType: "application/json" },
+              });
+              return await model.generateContent(input);
+            },
+            { operationName: "router ats_score (Gemini)" }
+          );
+        } catch (geminiErr: any) {
+          if (!isTransientError(geminiErr)) {
+            throw geminiErr;
+          }
+          console.warn("Gemini ats_score failed with transient error, falling back to Groq...");
+        }
+      }
+
+      if (groq) {
+        const textContent = typeof input === "string" ? input : JSON.stringify(input);
+        return await groq.chat.completions.create({
+          model: "openai/gpt-oss-120b",
+          messages: [{ role: "user", content: textContent }],
+          response_format: { type: "json_object" },
+        });
+      }
+      throw new Error("AI ATS scoring service is temporarily unavailable.");
+
     case "portfolio_generate":
       if (gemini) {
         try {

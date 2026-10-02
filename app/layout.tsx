@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/Toaster";
-import AnimatedBackground from "@/components/ui/AnimatedBackground";
+import AetherBackground from "@/components/ui/AetherBackground";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -27,11 +27,10 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className="dark" suppressHydrationWarning>
         <body
-          className="antialiased min-h-screen relative bg-[#0a0a0f] text-gray-100 selection:bg-indigo-500 selection:text-white"
+          className="antialiased min-h-screen relative bg-[#0a0a0f] text-gray-100 selection:bg-purple-500 selection:text-white"
         >
+          <AetherBackground />
           <ThemeProvider>
-            <AnimatedBackground />
-
             <div className="relative z-10 flex flex-col min-h-screen">
               {children}
             </div>

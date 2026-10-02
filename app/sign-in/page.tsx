@@ -12,39 +12,26 @@ export default function SignInPage() {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-6 py-12">
+      {/* Ambient background glow */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-purple-600/15 blur-[120px] pointer-events-none" />
 
-      {/* Floating orbs */}
-      <div className="absolute top-20 left-[15%] w-72 h-72 rounded-full bg-primary/10 blur-3xl animate-float" />
-      <div className="absolute bottom-20 right-[15%] w-80 h-80 rounded-full bg-accent/8 blur-3xl animate-float-delayed" />
-
-      {/* Grid pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 1px)`,
-          backgroundSize: "40px 40px",
-        }}
-      />
-
-      <div className="relative z-10 w-full max-w-md px-6 animate-scale-in">
+      <div className="relative z-10 w-full max-w-md animate-scale-in">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl gradient-bg text-white shadow-lg shadow-primary/25 mb-4">
+          <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-[0_0_25px_rgba(168,85,247,0.5)] mb-4">
             <Sparkles className="h-7 w-7" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+          <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-300">
             Welcome Back
           </h1>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Sign in to your CareerOS account
+          <p className="text-gray-400 mt-2 text-sm">
+            Sign in to your SkillProof workspace
           </p>
         </div>
 
-        {/* Clerk SignIn */}
-        <div className="glass rounded-2xl p-6 shadow-xl min-h-[380px] flex items-center justify-center">
+        {/* Clerk SignIn in Glass Card */}
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-[0_8px_32px_rgba(139,92,246,0.2)] min-h-[380px] flex items-center justify-center">
           {mounted ? (
             <SignIn
               routing="hash"
@@ -53,26 +40,26 @@ export default function SignInPage() {
               appearance={{
                 elements: {
                   formButtonPrimary:
-                    "bg-primary hover:bg-primary-hover text-primary-foreground shadow-lg",
-                  card: "bg-transparent shadow-none w-full",
+                    "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(139,92,246,0.4)] rounded-xl py-3 font-semibold",
+                  card: "bg-transparent shadow-none w-full p-0",
                   headerTitle: "hidden",
                   headerSubtitle: "hidden",
                   socialButtonsBlockButton:
-                    "border-border bg-card hover:bg-muted text-foreground",
-                  socialButtonsBlockButtonText: "text-foreground font-medium",
+                    "border border-white/10 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all",
+                  socialButtonsBlockButtonText: "text-white font-medium text-sm",
                   formFieldInput:
-                    "border-input bg-card text-foreground rounded-xl",
-                  formFieldLabel: "text-foreground",
-                  footerActionLink: "text-primary hover:text-primary-hover",
-                  identityPreviewEditButton: "text-primary",
-                  formResendCodeLink: "text-primary",
+                    "border-white/10 bg-white/5 text-white rounded-xl focus:border-purple-500/50 focus:ring-purple-500/20",
+                  formFieldLabel: "text-gray-300 font-medium text-xs",
+                  footerActionLink: "text-purple-400 hover:text-purple-300 font-semibold",
+                  identityPreviewEditButton: "text-purple-400",
+                  formResendCodeLink: "text-purple-400",
                 },
               }}
             />
           ) : (
             <div className="flex flex-col items-center justify-center py-12 space-y-3">
-              <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
-              <p className="text-xs text-muted-foreground">Loading sign in...</p>
+              <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
+              <p className="text-xs text-gray-400">Loading sign in...</p>
             </div>
           )}
         </div>

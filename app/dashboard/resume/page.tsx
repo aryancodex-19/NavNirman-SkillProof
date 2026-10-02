@@ -13,7 +13,7 @@ const ResumeEditor = dynamic(() => import("@/components/resume/ResumeEditor"), {
   loading: () => <LoadingSkeleton variant="form" />,
   ssr: false,
 });
-import { Loader2, Sparkles, Plus, FileText } from "lucide-react";
+import { Plus } from "lucide-react";
 import PageTransition from "@/components/ui/PageTransition";
 import GlassCard from "@/components/ui/GlassCard";
 import AnimatedButton from "@/components/ui/AnimatedButton";

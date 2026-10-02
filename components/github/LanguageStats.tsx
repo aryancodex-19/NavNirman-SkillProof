@@ -44,7 +44,7 @@ const LANG_COLORS: Record<string, string> = {
 };
 
 function getLangColor(name: string): string {
-  return LANG_COLORS[name] || "#6366f1";
+  return LANG_COLORS[name] || "#a855f7";
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -62,26 +62,26 @@ export default function LanguageStats({ data }: LanguageStatsProps) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.15 }}
-      className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] backdrop-blur-xl p-6"
+      className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_8px_32px_rgba(139,92,246,0.12)]"
     >
-      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-400/20 to-transparent pointer-events-none" />
 
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-violet-500/10 rounded-xl border border-violet-500/20">
-            <BarChart3 className="w-5 h-5 text-violet-400" />
+          <div className="p-2.5 bg-purple-500/10 rounded-xl border border-purple-500/20 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+            <BarChart3 className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base font-bold text-white">Language Stats</h3>
-            <p className="text-[11px] text-gray-500 mt-0.5">
+            <p className="text-[11px] text-gray-400 mt-0.5">
               {data.totalLanguages} languages across your repos
             </p>
           </div>
         </div>
-        <div className="px-3 py-1.5 bg-white/[0.03] rounded-lg border border-white/5">
+        <div className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
           <span className="text-xs font-semibold text-gray-300">
-            Primary: {data.primaryLanguage}
+            Primary: <strong className="text-white">{data.primaryLanguage}</strong>
           </span>
         </div>
       </div>
@@ -93,7 +93,7 @@ export default function LanguageStats({ data }: LanguageStatsProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span
-                  className="w-3 h-3 rounded-full shrink-0"
+                  className="w-3 h-3 rounded-full shrink-0 shadow-sm"
                   style={{ backgroundColor: getLangColor(lang.name) }}
                 />
                 <span className="text-sm font-semibold text-gray-200">
@@ -104,7 +104,7 @@ export default function LanguageStats({ data }: LanguageStatsProps) {
                 {lang.percentage}%
               </span>
             </div>
-            <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${lang.percentage}%` }}
@@ -123,10 +123,10 @@ export default function LanguageStats({ data }: LanguageStatsProps) {
 
       {/* Full Distribution Bar */}
       <div className="space-y-2 mb-6">
-        <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">
+        <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">
           Distribution
         </p>
-        <div className="w-full h-4 bg-white/5 rounded-full overflow-hidden flex">
+        <div className="w-full h-4 bg-white/5 rounded-full overflow-hidden flex border border-white/5">
           {data.languages.slice(0, 8).map((lang) => (
             <motion.div
               key={lang.name}
@@ -145,8 +145,8 @@ export default function LanguageStats({ data }: LanguageStatsProps) {
       {data.techStack.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Layers className="w-3.5 h-3.5 text-violet-400" />
-            <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">
+            <Layers className="w-3.5 h-3.5 text-purple-400" />
+            <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">
               Tech Stack
             </p>
           </div>
@@ -154,13 +154,13 @@ export default function LanguageStats({ data }: LanguageStatsProps) {
             {data.techStack.map(({ category, languages }) => (
               <div
                 key={category}
-                className="bg-white/[0.02] border border-white/5 rounded-xl p-3"
+                className="bg-white/[0.02] border border-white/10 rounded-xl p-3"
               >
                 <div className="flex items-center gap-1.5 mb-2">
                   <span className="text-sm">
                     {CATEGORY_ICONS[category] || "📦"}
                   </span>
-                  <span className="text-[11px] font-bold text-gray-300">
+                  <span className="text-[11px] font-bold text-gray-200">
                     {category}
                   </span>
                 </div>
@@ -187,17 +187,17 @@ export default function LanguageStats({ data }: LanguageStatsProps) {
 
       {/* Score Indicator */}
       <div className="mt-5 flex items-center justify-between px-1">
-        <span className="text-xs text-gray-500 font-medium">Language Score</span>
+        <span className="text-xs text-gray-400 font-medium">Language Score</span>
         <div className="flex items-center gap-2">
-          <div className="w-32 h-2 bg-white/5 rounded-full overflow-hidden">
+          <div className="w-32 h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${data.score}%` }}
               transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-              className="h-full bg-gradient-to-r from-violet-500 to-pink-500 rounded-full"
+              className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.4)]"
             />
           </div>
-          <span className="text-sm font-bold text-violet-400">{data.score}</span>
+          <span className="text-sm font-bold text-purple-400">{data.score}</span>
         </div>
       </div>
     </motion.div>

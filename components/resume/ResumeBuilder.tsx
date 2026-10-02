@@ -8,7 +8,6 @@ import {
   Trash2,
   Plus,
   ArrowLeft,
-  ChevronRight,
   Briefcase,
   GraduationCap,
   Wrench,
@@ -69,25 +68,6 @@ export default function ResumeBuilder() {
   // Skill input helper
   const [skillInput, setSkillInput] = useState("");
 
-  // Fetch list of saved resumes
-  const fetchResumes = async () => {
-    try {
-      setLoadingList(true);
-      const res = await fetch("/api/resume/save", { method: "GET" }).catch(() => null);
-      if (res && res.ok) {
-        // Wait, does the save route support GET? Let's check.
-        // Wait! We didn't define a GET handler in /api/resume/save. Let's create an API route for listing if needed, or query them inside a Server Component in app/dashboard/resume/page.tsx and pass them.
-        // Let's implement the GET fetch inside /api/resume/save/route.ts later, or list from a new action.
-        // For simplicity, we can fetch from a GET request to `/api/resume/save` or implement it. Let's check what routes are available.
-        // Let's implement list/GET inside `/api/resume/save/route.ts`! That is a very clean API choice. Let's make sure it handles GET.
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingList(false);
-    }
-  };
-
   // We can fetch user resumes on mount
   useEffect(() => {
     // Fetch list of resumes
@@ -133,19 +113,19 @@ export default function ResumeBuilder() {
     // Handle parsed JSON fields from SQLite
     try {
       setSkills(typeof resData.skills === "string" ? JSON.parse(resData.skills) : resData.skills || []);
-    } catch (e) {
+    } catch {
       setSkills([]);
     }
 
     try {
       setExperience(typeof resData.experience === "string" ? JSON.parse(resData.experience) : resData.experience || []);
-    } catch (e) {
+    } catch {
       setExperience([]);
     }
 
     try {
       setEducation(typeof resData.education === "string" ? JSON.parse(resData.education) : resData.education || []);
-    } catch (e) {
+    } catch {
       setEducation([]);
     }
 
@@ -340,7 +320,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
       } else {
         toast.error("Failed to delete resume");
       }
-    } catch (err) {
+    } catch {
       toast.error("Error deleting resume");
     }
   };
@@ -356,7 +336,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
         // If query param fetch isn't supported, fetch full object from local list or handle it
         toast.error("Failed to load resume");
       }
-    } catch (err) {
+    } catch {
       toast.error("Error loading resume");
     }
   };
@@ -385,7 +365,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
       const data = await res.json();
       setSummary(data.summary);
       toast.success("Summary optimized for " + targetRole);
-    } catch (err) {
+    } catch {
       toast.error("Failed to optimize summary");
     } finally {
       setRewritingSummary(false);
@@ -418,7 +398,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
       updatedExp[expIdx].bullets[bulletIdx] = data.bullet;
       setExperience(updatedExp);
       toast.success("Bullet point optimized!");
-    } catch (err) {
+    } catch {
       toast.error("Failed to optimize bullet point");
     } finally {
       setRewritingBulletIdx(null);
@@ -451,7 +431,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
         setExperience(data.experience);
         toast.success("All experience entry bullet points rewritten!");
       }
-    } catch (err) {
+    } catch {
       toast.error("Failed to optimize experience section");
     } finally {
       setRewritingAllExp(false);
@@ -481,7 +461,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
       setAtsResult(data);
       setAtsScore(data.score);
       toast.success("ATS scan complete! Score: " + data.score + "%");
-    } catch (err) {
+    } catch {
       toast.error("Failed to run ATS scanner");
     } finally {
       setScanningATS(false);
@@ -575,7 +555,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
       <div className="space-y-8 animate-fade-in max-w-4xl mx-auto py-4">
         {/* Title */}
         <div className="flex flex-col gap-2 text-center md:text-left">
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">
             AI Resume Builder
           </h1>
           <p className="text-muted-foreground text-sm max-w-xl">
@@ -584,7 +564,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
         </div>
 
         {/* Upload Container */}
-        <div className="glass-card p-6 md:p-8 rounded-2xl border border-border shadow-xl space-y-6">
+        <div className="glass-card p-6 md:p-8 rounded-2xl border border-white/10 shadow-[0_8px_32px_rgba(139,92,246,0.15)] space-y-6">
           <FileUpload
             onFileSelect={handleFileSelect}
             loading={uploading}
@@ -600,7 +580,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
           <div className="flex justify-center">
             <button
               onClick={handleStartBlank}
-              className="flex items-center gap-2 px-6 py-3 border border-border bg-card hover:bg-card-hover text-foreground font-semibold rounded-xl transition-all duration-300 shadow-md hover:scale-[1.01]"
+              className="flex items-center gap-2 px-6 py-3 border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-purple-500/40 text-white font-semibold rounded-xl transition-all duration-300 shadow-[0_4px_16px_rgba(0,0,0,0.3)] hover:shadow-[0_0_20px_rgba(139,92,246,0.35)] hover:scale-[1.02] active:scale-[0.97]"
             >
               <Plus className="w-5 h-5 text-primary" />
               <span>Create from Scratch</span>
@@ -630,7 +610,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                 <div
                   key={resume.id}
                   onClick={() => handleSelectResume(resume)}
-                  className="group flex items-center justify-between p-4 bg-card border border-border hover:border-primary/50 hover:bg-card-hover rounded-xl cursor-pointer shadow-sm transition-all duration-300 hover:scale-[1.01]"
+                  className="group flex items-center justify-between p-4 bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:border-purple-500/40 hover:bg-white/[0.06] rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_0_20px_rgba(139,92,246,0.25)]"
                 >
                   <div className="space-y-1">
                     <h4 className="font-bold text-foreground text-sm group-hover:text-primary transition-colors">
@@ -673,11 +653,11 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
   return (
     <div className="h-full flex flex-col gap-6 animate-fade-in">
       {/* Top action bar */}
-      <div className="no-print flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border pb-4">
+      <div className="no-print flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
         <div className="flex items-center gap-3">
           <button
             onClick={handleBackToMenu}
-            className="p-2 border border-border bg-card hover:bg-card-hover text-muted-foreground hover:text-foreground rounded-xl transition-all shadow-sm"
+            className="p-2 border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-purple-500/40 text-muted-foreground hover:text-white rounded-xl transition-all duration-300"
             title="Back to Resumes"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -696,7 +676,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
           {/* Mobile view toggler */}
-          <div className="lg:hidden flex border border-border bg-card p-1 rounded-xl w-full sm:w-auto">
+          <div className="lg:hidden flex border border-white/10 bg-white/5 backdrop-blur-md p-1 rounded-xl w-full sm:w-auto">
             <button
               onClick={() => setMobileMode("edit")}
               className={`flex-1 sm:flex-initial px-4 py-2 text-xs font-bold rounded-lg transition-all ${
@@ -717,7 +697,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
 
           <button
             onClick={handleSendToATS}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 border border-border bg-card hover:bg-card-hover text-foreground font-bold rounded-xl shadow-sm transition-all hover:scale-[1.02] shrink-0 w-full sm:w-auto text-xs"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-purple-500/40 text-white font-bold rounded-xl transition-all duration-300 hover:shadow-[0_0_18px_rgba(139,92,246,0.35)] hover:scale-[1.02] active:scale-[0.97] shrink-0 w-full sm:w-auto text-xs"
           >
             <Activity className="w-3.5 h-3.5 text-primary" />
             <span>Send to ATS</span>
@@ -725,7 +705,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
 
           <button
             onClick={handleSendToPortfolio}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 border border-border bg-card hover:bg-card-hover text-foreground font-bold rounded-xl shadow-sm transition-all hover:scale-[1.02] shrink-0 w-full sm:w-auto text-xs"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 hover:border-purple-500/40 text-white font-bold rounded-xl transition-all duration-300 hover:shadow-[0_0_18px_rgba(139,92,246,0.35)] hover:scale-[1.02] active:scale-[0.97] shrink-0 w-full sm:w-auto text-xs"
           >
             <Sparkles className="w-3.5 h-3.5 text-purple-500" />
             <span>Send to Portfolio</span>
@@ -733,7 +713,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
 
           <button
             onClick={handleSave}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-purple-600 hover:from-primary-hover hover:to-purple-700 text-white font-bold rounded-xl shadow-md transition-all hover:scale-[1.02] shrink-0 w-full sm:w-auto text-xs"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all duration-300 shadow-[0_0_25px_rgba(139,92,246,0.5)] hover:shadow-[0_0_40px_rgba(139,92,246,0.8)] hover:scale-[1.02] active:scale-[0.97] shimmer shrink-0 w-full sm:w-auto text-xs"
           >
             <Save className="w-4 h-4" />
             <span>Save Draft</span>
@@ -780,7 +760,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
           <div className="flex-1 space-y-6">
             {/* Details Panel */}
             {activeTab === "details" && (
-              <div className="glass-card p-6 border border-border rounded-2xl space-y-4">
+              <div className="glass-card p-6 border border-white/10 rounded-2xl space-y-4">
                 <h3 className="font-bold text-foreground text-base border-b border-border pb-2">
                   Personal Information
                 </h3>
@@ -794,7 +774,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Jane Doe"
-                      className="w-full px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-card-hover focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground text-sm transition-all"
+                      className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/[0.07] focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.3)] focus:outline-none text-foreground text-sm transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -806,7 +786,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                       value={targetRole}
                       onChange={(e) => setTargetRole(e.target.value)}
                       placeholder="Frontend Developer"
-                      className="w-full px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-card-hover focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground text-sm transition-all"
+                      className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/[0.07] focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.3)] focus:outline-none text-foreground text-sm transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -818,7 +798,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="jane.doe@example.com"
-                      className="w-full px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-card-hover focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground text-sm transition-all"
+                      className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/[0.07] focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.3)] focus:outline-none text-foreground text-sm transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -830,7 +810,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="+1 (555) 123-4567"
-                      className="w-full px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-card-hover focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground text-sm transition-all"
+                      className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/[0.07] focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.3)] focus:outline-none text-foreground text-sm transition-all"
                     />
                   </div>
                 </div>
@@ -858,7 +838,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                     value={summary}
                     onChange={(e) => setSummary(e.target.value)}
                     placeholder="Brief overview of your experience, skills, and career focus..."
-                    className="w-full px-4 py-3 rounded-xl border border-border bg-card hover:bg-card-hover focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground text-sm transition-all resize-none leading-relaxed"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/[0.07] focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.3)] focus:outline-none text-foreground text-sm transition-all resize-none leading-relaxed"
                   />
                 </div>
               </div>
@@ -866,7 +846,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
 
             {/* Skills Panel */}
             {activeTab === "skills" && (
-              <div className="glass-card p-6 border border-border rounded-2xl space-y-4">
+              <div className="glass-card p-6 border border-white/10 rounded-2xl space-y-4">
                 <h3 className="font-bold text-foreground text-base border-b border-border pb-2">
                   Skills & Core Competencies
                 </h3>
@@ -877,11 +857,11 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                     value={skillInput}
                     onChange={(e) => setSkillInput(e.target.value)}
                     placeholder="Type a skill (e.g. JavaScript, AWS, Project Management) and press Enter"
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-card hover:bg-card-hover focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground text-sm transition-all"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/[0.07] focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.3)] focus:outline-none text-foreground text-sm transition-all"
                   />
                   <button
                     type="submit"
-                    className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground font-bold rounded-xl shadow transition-all hover:scale-[1.01] text-sm"
+                    className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(139,92,246,0.45)] hover:shadow-[0_0_32px_rgba(139,92,246,0.75)] hover:scale-[1.02] active:scale-[0.97] text-sm shimmer"
                   >
                     Add
                   </button>
@@ -894,7 +874,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                     skills.map((skill, index) => (
                       <span
                         key={index}
-                        className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1.5 bg-secondary text-foreground text-xs font-semibold rounded-lg border border-border group"
+                        className="inline-flex items-center gap-1.5 pl-3 pr-2 py-1.5 bg-white/5 backdrop-blur-md text-gray-200 text-xs font-semibold rounded-lg border border-white/10 group transition-all duration-300 hover:border-purple-500/40"
                       >
                         <span>{skill}</span>
                         <button
@@ -933,7 +913,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                     )}
                     <button
                       onClick={handleAddExperience}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold rounded-lg transition-all"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-lg transition-all duration-300 shadow-[0_0_15px_rgba(139,92,246,0.4)] hover:scale-[1.02] active:scale-[0.97] shimmer"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Add Work</span>
@@ -942,7 +922,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                 </div>
 
                 {experience.length === 0 ? (
-                  <div className="glass-card p-6 border border-border rounded-2xl text-center">
+                  <div className="glass-card p-6 border border-white/10 rounded-2xl text-center">
                     <p className="text-sm text-muted-foreground italic">No work experience entries added.</p>
                   </div>
                 ) : (
@@ -950,7 +930,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                     {experience.map((exp, expIdx) => (
                       <div
                         key={expIdx}
-                        className="glass-card p-6 border border-border rounded-2xl relative space-y-4 group/card"
+                        className="glass-card p-6 border border-white/10 rounded-2xl relative space-y-4 group/card"
                       >
                         <button
                           onClick={() => handleRemoveExperience(expIdx)}
@@ -970,7 +950,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                               value={exp.company}
                               onChange={(e) => handleUpdateExperience(expIdx, "company", e.target.value)}
                               placeholder="Google"
-                              className="w-full px-3 py-2 rounded-lg border border-border bg-card focus:border-primary focus:outline-none text-foreground text-sm"
+                              className="w-full px-3 py-2 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.25)] focus:outline-none text-foreground text-sm"
                             />
                           </div>
                           <div className="space-y-1.5">
@@ -982,7 +962,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                               value={exp.role}
                               onChange={(e) => handleUpdateExperience(expIdx, "role", e.target.value)}
                               placeholder="Software Engineer"
-                              className="w-full px-3 py-2 rounded-lg border border-border bg-card focus:border-primary focus:outline-none text-foreground text-sm"
+                              className="w-full px-3 py-2 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.25)] focus:outline-none text-foreground text-sm"
                             />
                           </div>
                           <div className="space-y-1.5">
@@ -994,7 +974,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                               value={exp.duration}
                               onChange={(e) => handleUpdateExperience(expIdx, "duration", e.target.value)}
                               placeholder="June 2023 - Present"
-                              className="w-full px-3 py-2 rounded-lg border border-border bg-card focus:border-primary focus:outline-none text-foreground text-sm"
+                              className="w-full px-3 py-2 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.25)] focus:outline-none text-foreground text-sm"
                             />
                           </div>
                         </div>
@@ -1022,7 +1002,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                                   value={bullet}
                                   onChange={(e) => handleUpdateBullet(expIdx, bulletIdx, e.target.value)}
                                   placeholder="Spearheaded design and deployment of cloud infrastructure..."
-                                  className="flex-1 px-3 py-2 rounded-lg border border-border bg-card focus:border-primary focus:outline-none text-foreground text-xs"
+                                  className="flex-1 px-3 py-2 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.25)] focus:outline-none text-foreground text-xs"
                                 />
 
                                 {/* AI bullet rewrite */}
@@ -1068,7 +1048,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                   <h3 className="font-bold text-foreground text-base">Education History</h3>
                   <button
                     onClick={handleAddEducation}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold rounded-lg transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-lg transition-all duration-300 shadow-[0_0_15px_rgba(139,92,246,0.4)] hover:scale-[1.02] active:scale-[0.97] shimmer"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Add School</span>
@@ -1076,7 +1056,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                 </div>
 
                 {education.length === 0 ? (
-                  <div className="glass-card p-6 border border-border rounded-2xl text-center">
+                  <div className="glass-card p-6 border border-white/10 rounded-2xl text-center">
                     <p className="text-sm text-muted-foreground italic">No education entries added.</p>
                   </div>
                 ) : (
@@ -1084,7 +1064,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                     {education.map((edu, idx) => (
                       <div
                         key={idx}
-                        className="glass-card p-6 border border-border rounded-2xl relative space-y-4 group/card"
+                        className="glass-card p-6 border border-white/10 rounded-2xl relative space-y-4 group/card"
                       >
                         <button
                           onClick={() => handleRemoveEducation(idx)}
@@ -1104,7 +1084,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                               value={edu.school}
                               onChange={(e) => handleUpdateEducation(idx, "school", e.target.value)}
                               placeholder="Stanford University"
-                              className="w-full px-3 py-2 rounded-lg border border-border bg-card focus:border-primary focus:outline-none text-foreground text-sm"
+                              className="w-full px-3 py-2 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.25)] focus:outline-none text-foreground text-sm"
                             />
                           </div>
                           <div className="space-y-1.5">
@@ -1116,7 +1096,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                               value={edu.degree}
                               onChange={(e) => handleUpdateEducation(idx, "degree", e.target.value)}
                               placeholder="B.S. in Computer Science"
-                              className="w-full px-3 py-2 rounded-lg border border-border bg-card focus:border-primary focus:outline-none text-foreground text-sm"
+                              className="w-full px-3 py-2 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.25)] focus:outline-none text-foreground text-sm"
                             />
                           </div>
                           <div className="space-y-1.5">
@@ -1128,7 +1108,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                               value={edu.year}
                               onChange={(e) => handleUpdateEducation(idx, "year", e.target.value)}
                               placeholder="2026"
-                              className="w-full px-3 py-2 rounded-lg border border-border bg-card focus:border-primary focus:outline-none text-foreground text-sm"
+                              className="w-full px-3 py-2 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.25)] focus:outline-none text-foreground text-sm"
                             />
                           </div>
                           <div className="space-y-1.5">
@@ -1140,7 +1120,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                               value={edu.gpa}
                               onChange={(e) => handleUpdateEducation(idx, "gpa", e.target.value)}
                               placeholder="3.8/4.0"
-                              className="w-full px-3 py-2 rounded-lg border border-border bg-card focus:border-primary focus:outline-none text-foreground text-sm"
+                              className="w-full px-3 py-2 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.25)] focus:outline-none text-foreground text-sm"
                             />
                           </div>
                         </div>
@@ -1153,7 +1133,7 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
 
             {/* ATS Scanner Panel */}
             {activeTab === "ats" && (
-              <div className="glass-card p-6 border border-border rounded-2xl space-y-6">
+              <div className="glass-card p-6 border border-white/10 rounded-2xl space-y-6">
                 <div className="flex flex-col gap-1">
                   <h3 className="font-bold text-foreground text-base">ATS Compatibility Scanner</h3>
                   <p className="text-xs text-muted-foreground">
@@ -1170,14 +1150,14 @@ ${edu.degree} from ${edu.school} (${edu.year}) ${edu.gpa ? `GPA: ${edu.gpa}` : "
                     value={jobDescription}
                     onChange={(e) => setJobDescription(e.target.value)}
                     placeholder="Paste full job description from LinkedIn, Indeed, etc. here..."
-                    className="w-full px-4 py-3 rounded-xl border border-border bg-card hover:bg-card-hover focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground text-sm transition-all resize-none leading-relaxed"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/[0.07] focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.3)] focus:outline-none text-foreground text-sm transition-all resize-none leading-relaxed"
                   />
                 </div>
 
                 <button
                   onClick={handleScanATS}
                   disabled={scanningATS}
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-primary hover:bg-primary-hover text-primary-foreground font-bold rounded-xl shadow transition-all hover:scale-[1.01] disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all duration-300 shadow-[0_0_25px_rgba(139,92,246,0.5)] hover:shadow-[0_0_40px_rgba(139,92,246,0.8)] hover:scale-[1.02] active:scale-[0.97] shimmer disabled:opacity-50"
                 >
                   {scanningATS ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

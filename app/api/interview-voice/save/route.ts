@@ -119,7 +119,7 @@ Return ONLY valid JSON:
   }
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     const { userId: clerkId } = await auth();
     if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

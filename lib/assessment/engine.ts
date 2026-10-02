@@ -282,7 +282,7 @@ export function classifySkillEvidence(params: {
   // - Package manifest declared without direct tests or verified commits
   // - Repository topic or title mention without deep implementation
   const partialTypes = Array.from(new Set(citations.map((c) => c.type.replace(/_/g, " ")))).join(", ");
-  
+
   let nextStepSuggestion = `Add automated test suites or implement a dedicated feature using ${skill} in a public repository.`;
   if (hasPackageManifest) {
     nextStepSuggestion = `Dependency is configured in manifest; add unit/integration tests and implementation code to elevate to PROVEN.`;
