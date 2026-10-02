@@ -3,8 +3,6 @@ import { prisma } from "@/lib/db/prisma";
 
 export async function GET() {
   try {
-    const db = prisma as any;
-    
     const [totalUsers, totalResumes, totalAtsScans, interviewSessionsCount, voiceInterviewsCount] = await Promise.all([
       prisma.user.count(),
       prisma.resume.count(),

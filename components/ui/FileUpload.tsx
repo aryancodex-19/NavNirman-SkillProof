@@ -81,10 +81,10 @@ export default function FileUpload({
         onDragLeave={handleDrag}
         onDrop={handleDrop}
         onClick={onButtonClick}
-        className={`relative flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300 min-h-[220px] ${
+        className={`relative flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300 min-h-[220px] bg-white/[0.03] backdrop-blur-xl ${
           isDragActive
-            ? "border-primary bg-primary/5 scale-[1.02]"
-            : "border-border hover:border-primary/50 hover:bg-card-hover bg-card"
+            ? "border-purple-500/60 bg-purple-500/[0.07] scale-[1.02] shadow-[0_0_30px_rgba(139,92,246,0.3)]"
+            : "border-white/10 hover:border-purple-500/40 hover:bg-white/[0.05]"
         } ${loading ? "pointer-events-none opacity-80" : ""}`}
       >
         <input
@@ -99,28 +99,28 @@ export default function FileUpload({
         {loading ? (
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="relative">
-              <Loader2 className="w-12 h-12 text-primary animate-spin" />
+              <Loader2 className="w-12 h-12 text-purple-400 animate-spin drop-shadow-[0_0_10px_rgba(168,85,247,0.7)]" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[10px] font-bold text-primary">{progress}%</span>
+                <span className="text-[10px] font-bold text-purple-200">{progress}%</span>
               </div>
             </div>
             <div>
-              <p className="text-foreground font-semibold">AI is analyzing your resume...</p>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-white font-semibold">AI is analyzing your resume...</p>
+              <p className="text-sm text-gray-400 mt-1">
                 Extracting contact info, skills, education, and career experience.
               </p>
             </div>
             {/* Progress bar */}
-            <div className="w-64 bg-secondary rounded-full h-2 overflow-hidden mt-2 border border-border">
+            <div className="w-64 bg-white/5 rounded-full h-2 overflow-hidden mt-2 border border-white/10">
               <div
-                className="bg-primary h-full transition-all duration-300 rounded-full"
+                className="h-full transition-all duration-300 rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 shadow-[0_0_12px_rgba(139,92,246,0.6)]"
                 style={{ width: `${progress}%` }}
               />
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center text-center space-y-4">
-            <div className="p-4 bg-primary/10 rounded-full text-primary group-hover:scale-110 transition-transform duration-300">
+            <div className="p-4 bg-purple-500/10 rounded-full text-purple-300 border border-purple-500/20 group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">
               {selectedFileName ? (
                 <Check className="w-8 h-8" />
               ) : (
@@ -130,19 +130,19 @@ export default function FileUpload({
 
             {selectedFileName ? (
               <div className="space-y-1">
-                <p className="text-foreground font-medium flex items-center justify-center gap-2">
-                  <File className="w-4 h-4 text-primary" />
+                <p className="text-white font-medium flex items-center justify-center gap-2">
+                  <File className="w-4 h-4 text-purple-400" />
                   {selectedFileName}
                 </p>
-                <p className="text-xs text-muted-foreground">Click or drag another file to replace</p>
+                <p className="text-xs text-gray-400">Click or drag another file to replace</p>
               </div>
             ) : (
               <div className="space-y-1">
-                <p className="text-foreground font-semibold">
+                <p className="text-white font-semibold">
                   Drag and drop your PDF resume here, or{" "}
-                  <span className="text-primary hover:underline">browse files</span>
+                  <span className="text-purple-300 hover:underline">browse files</span>
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-400">
                   Supports PDF format only (Max {maxSizeMB}MB)
                 </p>
               </div>
@@ -151,7 +151,7 @@ export default function FileUpload({
         )}
 
         {errorMessage && (
-          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-center gap-2 p-2 bg-destructive/10 text-destructive text-xs rounded-lg border border-destructive/20 animate-fade-in">
+          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-center gap-2 p-2 bg-red-500/10 text-red-400 text-xs rounded-lg border border-red-500/20 backdrop-blur-md animate-fade-in">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span className="font-medium">{errorMessage}</span>
           </div>

@@ -8,7 +8,7 @@ import WelcomeBanner from "@/components/dashboard/WelcomeBanner";
 import RealStatsCards from "@/components/dashboard/RealStatsCards";
 import PageTransition from "@/components/ui/PageTransition";
 import GlassCard from "@/components/ui/GlassCard";
-import { Clock } from "lucide-react";
+import { Clock, Sparkles } from "lucide-react";
 
 const ModuleCard = dynamic(() => import("@/components/dashboard/ModuleCard"), {
   loading: () => <LoadingSkeleton variant="card" />,
@@ -52,7 +52,7 @@ const MODULES = [
   },
   {
     title: "AI Voice Interview",
-    description: "Real adaptive AI voice mock interviews with live scoring, follow-up questions, and detailed performance report.",
+    description: "Real adaptive AI voice mock interviews with live scoring, follow-up questions, and performance reports.",
     status: "active" as const,
     iconName: "Mic",
     href: "/dashboard/interview-voice",
@@ -153,7 +153,7 @@ export default async function DashboardPage() {
     title: string;
     description: string;
     timestamp: Date;
-    glow: "indigo" | "violet" | "pink";
+    glow: "purple" | "violet" | "indigo";
   }> = [];
 
   if (dbUser) {
@@ -191,7 +191,7 @@ export default async function DashboardPage() {
         title: `Modified: ${r.title}`,
         description: `Updated resume draft`,
         timestamp: r.updatedAt,
-        glow: "indigo",
+        glow: "purple",
       });
     });
 
@@ -211,7 +211,7 @@ export default async function DashboardPage() {
         title: `Mock Interview complete`,
         description: `Role: ${i.role || "General"}`,
         timestamp: i.createdAt,
-        glow: "pink",
+        glow: "indigo",
       });
     });
 
@@ -221,7 +221,7 @@ export default async function DashboardPage() {
         title: `Voice Interview complete`,
         description: `Score: ${v.overallScore}% for ${v.targetRole}`,
         timestamp: v.createdAt,
-        glow: "pink",
+        glow: "purple",
       });
     });
 
@@ -240,7 +240,7 @@ export default async function DashboardPage() {
 
   return (
     <PageTransition staggerChildren={true}>
-      <div className="space-y-10 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="space-y-10 max-w-7xl mx-auto">
         
         {/* Welcome Section */}
         <WelcomeBanner displayName={displayName} targetRole={targetRole} />
@@ -257,11 +257,12 @@ export default async function DashboardPage() {
           {/* Module Cards Grid */}
           <div className="lg:col-span-2 space-y-6">
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-white">
-                Workspace Hub
+              <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                <span>Workspace Hub</span>
+                <Sparkles className="h-4 w-4 text-purple-400" />
               </h2>
-              <p className="text-xs text-muted-foreground mt-1">
-                Access CareerOS AI instruments optimized to support your professional progression.
+              <p className="text-xs text-gray-400 mt-1">
+                Access SkillProof AI instruments optimized to support your career progression.
               </p>
             </div>
 
@@ -284,22 +285,23 @@ export default async function DashboardPage() {
           {/* Recent Activity Feed */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-white">
-                Recent Activity
+              <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                <span>Recent Activity</span>
+                <Clock className="h-4 w-4 text-purple-400" />
               </h2>
-              <p className="text-xs text-muted-foreground mt-1">
-                Audit history log of actions completed in CareerOS.
+              <p className="text-xs text-gray-400 mt-1">
+                Audit history log of actions completed in SkillProof.
               </p>
             </div>
 
-            <GlassCard hoverEffect={false} className="p-6 space-y-6 bg-white/[0.01] h-[550px] overflow-y-auto">
+            <GlassCard hoverEffect={false} className="p-6 space-y-6 bg-white/[0.02] border-white/10 h-[560px] overflow-y-auto">
               {activities.length > 0 ? (
-                <div className="relative border-l border-white/5 pl-4 ml-2 space-y-6">
+                <div className="relative border-l border-white/10 pl-4 ml-2 space-y-6">
                   {activities.slice(0, 7).map((activity, idx) => {
                     const glowColors = {
-                      indigo: "bg-indigo-500",
-                      violet: "bg-violet-500",
-                      pink: "bg-pink-500",
+                      purple: "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]",
+                      violet: "bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.8)]",
+                      indigo: "bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]",
                     };
                     return (
                       <div key={idx} className="relative group">
@@ -307,16 +309,16 @@ export default async function DashboardPage() {
                         <span className={`absolute -left-[21px] top-1.5 h-2 w-2 rounded-full ${glowColors[activity.glow]} group-hover:scale-125 transition-transform`} />
                         
                         <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1.5 text-xs text-gray-400">
                             <Clock className="h-3 w-3" />
                             <span>{new Date(activity.timestamp).toLocaleDateString()}</span>
                             <span>&bull;</span>
-                            <span className="font-bold text-indigo-400">{activity.type}</span>
+                            <span className="font-bold text-purple-400">{activity.type}</span>
                           </div>
                           <h4 className="text-xs font-bold text-white">
                             {activity.title}
                           </h4>
-                          <p className="text-[10px] text-muted-foreground">
+                          <p className="text-[11px] text-gray-400">
                             {activity.description}
                           </p>
                         </div>
@@ -326,11 +328,11 @@ export default async function DashboardPage() {
                 </div>
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-center space-y-2 py-20">
-                  <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400">
+                  <div className="h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
                     <Clock className="h-5 w-5" />
                   </div>
                   <h4 className="text-xs font-bold text-white">No activity yet</h4>
-                  <p className="text-[10px] text-muted-foreground max-w-xs leading-relaxed">
+                  <p className="text-[11px] text-gray-400 max-w-xs leading-relaxed">
                     Start optimizing resumes or practicing interviews to see your logs appear here.
                   </p>
                 </div>

@@ -37,14 +37,14 @@ export default function GitHubConnect({
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] backdrop-blur-xl p-8"
+        className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-8 shadow-[0_8px_32px_rgba(139,92,246,0.15)]"
       >
-        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-400/20 to-transparent pointer-events-none" />
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-              <GitGraph className="w-6 h-6 text-emerald-400" />
+            <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+              <GitGraph className="w-6 h-6" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-white">Connected</h3>
@@ -55,7 +55,7 @@ export default function GitHubConnect({
           </div>
           <button
             onClick={onDisconnect}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:text-red-300 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 rounded-xl transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:text-red-300 bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 rounded-xl transition-all cursor-pointer"
           >
             <Unplug className="w-4 h-4" />
             Disconnect
@@ -69,15 +69,15 @@ export default function GitHubConnect({
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] backdrop-blur-xl"
+      className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_8px_32px_rgba(139,92,246,0.15)]"
     >
-      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
-      <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-500/5 blur-3xl pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-400/20 to-transparent pointer-events-none" />
+      <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
 
       <div className="relative z-10 p-8 sm:p-10">
         <div className="flex items-center gap-4 mb-6">
-          <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-            <GitGraph className="w-8 h-8 text-indigo-400" />
+          <div className="p-4 bg-purple-500/10 rounded-2xl border border-purple-500/20 text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.25)]">
+            <GitGraph className="w-8 h-8" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-white">
@@ -92,7 +92,7 @@ export default function GitHubConnect({
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Username Input */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            <label className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
               GitHub Username
             </label>
             <div className="relative">
@@ -104,7 +104,7 @@ export default function GitHubConnect({
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="your-username"
-                className="w-full pl-[105px] pr-4 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-gray-600 text-sm font-medium focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                className="w-full pl-[105px] pr-4 py-3.5 bg-white/[0.04] border border-white/10 rounded-xl text-white placeholder-gray-500 text-sm font-medium focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 focus:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-all"
                 required
               />
             </div>
@@ -115,7 +115,7 @@ export default function GitHubConnect({
             <button
               type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors cursor-pointer"
+              className="text-xs text-purple-400 hover:text-purple-300 font-semibold transition-colors cursor-pointer"
             >
               {showAdvanced
                 ? "▾ Hide advanced options"
@@ -128,9 +128,9 @@ export default function GitHubConnect({
                 animate={{ opacity: 1, height: "auto" }}
                 className="mt-3 space-y-2"
               >
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <label className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
                   Personal Access Token{" "}
-                  <span className="text-gray-600 normal-case">(optional)</span>
+                  <span className="text-gray-500 normal-case">(optional)</span>
                 </label>
                 <div className="relative">
                   <input
@@ -138,12 +138,12 @@ export default function GitHubConnect({
                     value={token}
                     onChange={(e) => setToken(e.target.value)}
                     placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                    className="w-full pl-4 pr-12 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-gray-600 text-sm font-mono focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                    className="w-full pl-4 pr-12 py-3.5 bg-white/[0.04] border border-white/10 rounded-xl text-white placeholder-gray-500 text-sm font-mono focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowToken(!showToken)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors cursor-pointer"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer"
                   >
                     {showToken ? (
                       <EyeOff className="w-4 h-4" />
@@ -152,14 +152,14 @@ export default function GitHubConnect({
                     )}
                   </button>
                 </div>
-                <p className="text-[11px] text-gray-500 leading-relaxed">
+                <p className="text-[11px] text-gray-400 leading-relaxed">
                   Adding a PAT enables analysis of private repos and increases
                   API rate limits. Create one at{" "}
                   <a
                     href="https://github.com/settings/tokens"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-indigo-400 hover:text-indigo-300"
+                    className="text-purple-400 hover:text-purple-300 underline"
                   >
                     github.com/settings/tokens
                   </a>
@@ -172,9 +172,9 @@ export default function GitHubConnect({
           <motion.button
             type="submit"
             disabled={isConnecting || !username.trim()}
-            whileHover={!isConnecting ? { scale: 1.02, y: -1 } : undefined}
+            whileHover={!isConnecting ? { scale: 1.02 } : undefined}
             whileTap={!isConnecting ? { scale: 0.98 } : undefined}
-            className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-3.5 bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 border border-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-3.5 bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-sm font-bold rounded-xl shadow-[0_0_25px_rgba(139,92,246,0.5)] hover:shadow-[0_0_40px_rgba(139,92,246,0.8)] border border-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shimmer"
           >
             {isConnecting ? (
               <>
@@ -200,7 +200,7 @@ export default function GitHubConnect({
           ].map(({ emoji, label }) => (
             <div
               key={label}
-              className="flex items-center gap-2 px-3 py-2 bg-white/[0.02] border border-white/5 rounded-xl text-xs text-gray-400 font-medium"
+              className="flex items-center gap-2 px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-xs text-gray-300 font-medium"
             >
               <span>{emoji}</span>
               {label}

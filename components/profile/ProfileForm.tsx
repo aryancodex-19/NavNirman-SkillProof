@@ -81,11 +81,11 @@ const getSkillColorClass = (skill: string) => {
   const hash = skill.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const index = hash % 3;
   if (index === 0) {
-    return "bg-indigo-500/10 text-indigo-300 border-indigo-500/20 hover:bg-indigo-500/20 hover:text-indigo-200";
+    return "bg-purple-500/10 text-purple-300 border-purple-500/20 hover:bg-purple-500/20 hover:text-purple-200";
   } else if (index === 1) {
     return "bg-violet-500/10 text-violet-300 border-violet-500/20 hover:bg-violet-500/20 hover:text-violet-200";
   } else {
-    return "bg-pink-500/10 text-pink-300 border-pink-500/20 hover:bg-pink-500/20 hover:text-pink-200";
+    return "bg-fuchsia-500/10 text-fuchsia-300 border-fuchsia-500/20 hover:bg-fuchsia-500/20 hover:text-fuchsia-200";
   }
 };
 
@@ -174,16 +174,16 @@ function ProfileForm({ initialData }: ProfileFormProps) {
   }, [name, targetRole, selectedSkills, githubUrl, linkedinUrl, bio]);
 
   const inputClasses =
-    "block w-full rounded-xl border border-input bg-card py-3 pl-11 pr-4 text-foreground placeholder-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200";
+    "block w-full rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm py-3 pl-11 pr-4 text-foreground placeholder-muted-foreground/50 focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.3)] focus:outline-none transition-all duration-300";
   const labelClasses =
-    "block text-sm font-semibold text-foreground mb-2";
+    "block text-sm font-semibold text-gray-200 mb-2";
   const iconClasses =
     "absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground z-10";
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-8 max-w-2xl mx-auto bg-card p-8 rounded-2xl border border-border shadow-sm animate-slide-up"
+      className="space-y-8 max-w-2xl mx-auto bg-white/[0.03] backdrop-blur-xl p-8 rounded-2xl border border-white/10 shadow-[0_8px_32px_rgba(139,92,246,0.15)] animate-slide-up"
     >
       {/* ── Name ── */}
       <div>
@@ -216,14 +216,14 @@ function ProfileForm({ initialData }: ProfileFormProps) {
         </label>
         <div className="relative">
           <div className={iconClasses}>
-            <Briefcase className={`h-5 w-5 transition-colors ${targetRole ? "text-indigo-400" : "text-muted-foreground"}`} />
+            <Briefcase className={`h-5 w-5 transition-colors ${targetRole ? "text-purple-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.7)]" : "text-muted-foreground"}`} />
           </div>
           <button
             id="targetRole"
             type="button"
             onClick={() => setIsRoleOpen((prev) => !prev)}
             className={`${inputClasses} flex items-center justify-between text-left cursor-pointer transition-all duration-200 ${
-              targetRole ? "gradient-border-active text-foreground border-transparent" : "text-muted-foreground/50 border-input"
+              targetRole ? "text-foreground border-purple-500/50 shadow-[0_0_15px_rgba(139,92,246,0.25)]" : "text-muted-foreground/50 border-white/10"
             }`}
           >
             <span>{targetRole || "Select your target role"}</span>
@@ -255,7 +255,7 @@ function ProfileForm({ initialData }: ProfileFormProps) {
                       }`}
                     >
                       <span>{role}</span>
-                      {isSelected && <Check className="h-4 w-4 text-indigo-400" />}
+                      {isSelected && <Check className="h-4 w-4 text-purple-400" />}
                     </button>
                   );
                 })}
@@ -274,7 +274,7 @@ function ProfileForm({ initialData }: ProfileFormProps) {
 
         {/* Selected skills pills */}
         {selectedSkills.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-3 p-3 bg-muted/40 rounded-xl border border-border transition-all duration-300">
+          <div className="flex flex-wrap gap-2 mb-3 p-3 bg-white/[0.03] backdrop-blur-md rounded-xl border border-white/10 transition-all duration-300">
             {selectedSkills.map((skill) => (
               <span
                 key={skill}
@@ -354,7 +354,7 @@ function ProfileForm({ initialData }: ProfileFormProps) {
                     >
                       <span>{skill}</span>
                       {isSelected && (
-                        <Check className="h-4 w-4 text-indigo-400" />
+                        <Check className="h-4 w-4 text-purple-400" />
                       )}
                     </button>
                   );
@@ -381,7 +381,7 @@ function ProfileForm({ initialData }: ProfileFormProps) {
             onChange={(e) => setBio(e.target.value)}
             rows={4}
             maxLength={500}
-            className="block w-full rounded-xl border border-input bg-card py-3 pl-11 pr-4 text-foreground placeholder-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 resize-none premium-focus"
+            className="block w-full rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm py-3 pl-11 pr-4 text-foreground placeholder-muted-foreground/50 focus:border-purple-500/50 focus:shadow-[0_0_15px_rgba(139,92,246,0.3)] focus:outline-none transition-all duration-300 resize-none premium-focus"
           />
         </div>
         <div className="flex justify-between mt-1.5">
@@ -446,7 +446,7 @@ function ProfileForm({ initialData }: ProfileFormProps) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full flex items-center justify-center gap-2 rounded-xl gradient-bg text-white font-semibold py-3.5 px-4 transition-all duration-300 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg cursor-pointer"
+        className="w-full shimmer relative overflow-hidden flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3.5 px-4 transition-all duration-300 shadow-[0_0_25px_rgba(139,92,246,0.5)] hover:shadow-[0_0_40px_rgba(139,92,246,0.8)] hover:scale-[1.02] active:scale-[0.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/60 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-[0_0_25px_rgba(139,92,246,0.5)] cursor-pointer"
       >
         {isSubmitting ? (
           <>

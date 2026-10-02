@@ -70,20 +70,23 @@ function ModuleCard({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={isActive ? { scale: 1.02, y: -4 } : undefined}
-      transition={{ duration: 0.3, delay: index * 0.05, ease: "easeOut" }}
+      transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
       className={`
         group relative overflow-hidden rounded-2xl border p-6 h-full
         transition-all duration-300 ease-out
         ${
           isActive
-            ? "bg-card border-border hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 cursor-pointer"
-            : "bg-card/50 border-border/50 cursor-pointer hover:bg-card/80"
+            ? "bg-white/[0.03] backdrop-blur-xl border-white/10 hover:border-purple-500/40 hover:shadow-[0_8px_32px_rgba(139,92,246,0.2)] cursor-pointer"
+            : "bg-white/[0.01] border-white/5 cursor-pointer opacity-70"
         }
       `}
     >
+      {/* Top subtle border highlight */}
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-400/20 to-transparent pointer-events-none" />
+
       {/* Hover glow — active cards only */}
       {isActive && (
-        <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-primary/5 blur-2xl transition-all duration-500 group-hover:bg-primary/10 group-hover:h-36 group-hover:w-36" />
+        <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-purple-500/10 blur-2xl transition-all duration-500 group-hover:bg-purple-500/20" />
       )}
 
       <div className="relative z-10 flex flex-col h-full">
@@ -94,8 +97,8 @@ function ModuleCard({
           transition-all duration-300
           ${
             isActive
-              ? "bg-primary/10 text-primary group-hover:bg-primary/15 group-hover:scale-110"
-              : "bg-muted text-muted-foreground"
+              ? "bg-purple-500/10 text-purple-400 border border-purple-500/20 group-hover:bg-purple-500/20 group-hover:border-purple-500/40 group-hover:scale-110 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+              : "bg-white/5 text-gray-500"
           }
         `}
         >
@@ -106,8 +109,8 @@ function ModuleCard({
         <h3
           className={`text-lg font-bold tracking-tight mb-2 transition-colors duration-300 ${
             isActive
-              ? "text-card-foreground group-hover:text-primary"
-              : "text-muted-foreground"
+              ? "text-white group-hover:text-purple-300"
+              : "text-gray-400"
           }`}
         >
           {title}
@@ -115,29 +118,32 @@ function ModuleCard({
 
         {/* Description */}
         <p
-          className={`text-sm leading-relaxed mb-5 flex-1 ${
-            isActive ? "text-muted-foreground" : "text-muted-foreground/60"
+          className={`text-xs sm:text-sm leading-relaxed mb-5 flex-1 ${
+            isActive ? "text-gray-300" : "text-gray-400"
           }`}
         >
           {description}
         </p>
 
         {/* Badge + Action */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-2 border-t border-white/5">
           {isActive ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success border border-success/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.15)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
               {badge || "Active"}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1 text-xs font-medium text-gray-400 border border-white/10">
               <Lock className="h-3 w-3" />
               Coming Soon
             </span>
           )}
 
           {isActive && (
-            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
+            <div className="flex items-center gap-1 text-xs font-bold text-purple-400 group-hover:translate-x-1 transition-transform">
+              <span>Launch</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </div>
           )}
         </div>
       </div>
@@ -145,7 +151,7 @@ function ModuleCard({
   );
 
   if (isActive && href) {
-    return <Link href={href}>{cardContent}</Link>;
+    return <Link href={href} className="block h-full">{cardContent}</Link>;
   }
 
   return cardContent;

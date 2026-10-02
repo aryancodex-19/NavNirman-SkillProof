@@ -100,7 +100,7 @@ function CircularProgress({
       <div className="relative flex items-center justify-center w-20 h-20">
         <svg className="w-full h-full transform -rotate-90">
           <circle
-            className="text-muted/20"
+            className="text-white/10"
             strokeWidth={stroke}
             stroke="currentColor"
             fill="transparent"
@@ -123,9 +123,9 @@ function CircularProgress({
             cy={radius}
           />
         </svg>
-        <span className="absolute text-sm font-black text-foreground">{score}%</span>
+        <span className="absolute text-sm font-black text-white">{score}%</span>
       </div>
-      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+      <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
         {label}
       </span>
     </div>
@@ -139,7 +139,7 @@ function MicVisualizer({ active }: { active: boolean }) {
       {[1.2, 2.5, 3.8, 4.2, 3.0, 2.2, 3.5, 4.5, 2.8, 1.5].map((h, i) => (
         <motion.div
           key={i}
-          className="w-1 rounded-full bg-primary"
+          className="w-1 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.8)]"
           animate={
             active
               ? {
@@ -168,11 +168,11 @@ function MicVisualizer({ active }: { active: boolean }) {
 // ─── Difficulty Badge Config ──────────────────────────────────────────────────
 function DifficultyBadge({ level }: { level: number }) {
   const configs = [
-    { label: "Warm-up", color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" },
-    { label: "Easy", color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" },
-    { label: "Medium", color: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
-    { label: "Hard", color: "bg-rose-500/10 text-rose-500 border-rose-500/20" },
-    { label: "Expert", color: "bg-purple-500/10 text-purple-500 border-purple-500/20" },
+    { label: "Warm-up", color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+    { label: "Easy", color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+    { label: "Medium", color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
+    { label: "Hard", color: "bg-rose-500/10 text-rose-400 border-rose-500/20" },
+    { label: "Expert", color: "bg-purple-500/10 text-purple-400 border-purple-500/20" },
   ];
   const c = configs[Math.min(level - 1, 4)];
   return (
@@ -185,11 +185,11 @@ function DifficultyBadge({ level }: { level: number }) {
 // ─── Typing/Thinking Indicator ───────────────────────────────────────────────
 function ThinkingIndicator() {
   return (
-    <div className="flex items-center gap-1.5 px-3 py-2 bg-muted/40 rounded-2xl w-fit">
+    <div className="flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 rounded-2xl w-fit">
       {[0, 0.2, 0.4].map((delay) => (
         <motion.div
           key={delay}
-          className="w-2 h-2 bg-primary rounded-full"
+          className="w-2 h-2 bg-purple-400 rounded-full shadow-[0_0_6px_rgba(192,132,252,0.8)]"
           animate={{ y: [0, -5, 0] }}
           transition={{ duration: 0.6, repeat: Infinity, delay }}
         />
@@ -222,7 +222,6 @@ export default function VoiceChatUI({
   const [textInput, setTextInput] = useState("");
 
   // Refs
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -657,9 +656,9 @@ export default function VoiceChatUI({
 
   // Color Coding for circular score
   const getCircleColorClass = (score: number) => {
-    if (score >= 75) return "text-emerald-500";
-    if (score >= 50) return "text-amber-500";
-    return "text-rose-500";
+    if (score >= 75) return "text-emerald-400";
+    if (score >= 50) return "text-amber-400";
+    return "text-rose-400";
   };
 
   // ── Render: Idle screen ────────────────────────────────────────────────────
@@ -671,21 +670,21 @@ export default function VoiceChatUI({
         transition={{ duration: 0.4 }}
         className="max-w-2xl mx-auto"
       >
-        <Card className="relative overflow-hidden bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl p-8 sm:p-10 text-center shadow-xl">
+        <Card className="relative overflow-hidden bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-8 sm:p-10 text-center shadow-[0_8px_32px_rgba(139,92,246,0.15)]">
           {/* Decorative Glow */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-indigo-600/5 pointer-events-none" />
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10 space-y-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 border border-primary/20 rounded-2xl mx-auto shadow-inner">
-              <Mic className="w-10 h-10 text-primary animate-pulse" />
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl mx-auto shadow-[0_0_30px_rgba(139,92,246,0.4)]">
+              <Mic className="w-10 h-10 text-white animate-pulse" />
             </div>
 
             <div className="space-y-3">
-              <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
+              <h2 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-300 tracking-tight">
                 AI Voice Mock Interview
               </h2>
-              <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
+              <p className="text-gray-400 text-sm max-w-md mx-auto leading-relaxed">
                 Step into a real interview simulation powered by Groq Llama 3.3. Practice answering adaptive, AI-generated questions either with your voice or via text, and receive expert analysis of your performance.
               </p>
             </div>
@@ -700,35 +699,35 @@ export default function VoiceChatUI({
               ].map(({ icon: Icon, title, desc }) => (
                 <div
                   key={title}
-                  className="flex gap-2.5 p-3 rounded-xl bg-muted/40 border border-border/30 hover:border-primary/20 transition-all"
+                  className="flex gap-2.5 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/30 transition-all"
                 >
-                  <Icon className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <Icon className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-xs font-bold text-foreground">{title}</h4>
-                    <p className="text-[10px] text-muted-foreground">{desc}</p>
+                    <h4 className="text-xs font-bold text-white">{title}</h4>
+                    <p className="text-[10px] text-gray-400">{desc}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Profile context summary */}
-            <div className="bg-muted/40 border border-border/30 rounded-xl p-4 text-left space-y-2">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-left space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                   Target Role
                 </span>
-                <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-bold">
+                <span className="text-[10px] bg-purple-500/10 text-purple-300 px-2 py-0.5 rounded-full font-bold border border-purple-500/20">
                   Adaptive
                 </span>
               </div>
-              <p className="text-sm font-bold text-foreground">{targetRole}</p>
+              <p className="text-sm font-bold text-white">{targetRole}</p>
               {skills && (
-                <div className="flex flex-wrap gap-1.5 pt-1 border-t border-border/20">
+                <div className="flex flex-wrap gap-1.5 pt-1 border-t border-white/5">
                   {skills.split(",").slice(0, 4).map((s) => (
                     <Badge
                       key={s}
                       variant="secondary"
-                      className="text-[10px] bg-primary/5 border border-primary/10 text-primary py-0 px-2 font-semibold"
+                      className="text-[10px] bg-purple-500/10 border border-purple-500/20 text-purple-300 py-0 px-2 font-semibold"
                     >
                       {s.trim()}
                     </Badge>
@@ -738,13 +737,13 @@ export default function VoiceChatUI({
             </div>
 
             {/* Mode selection buttons */}
-            <div className="flex items-center justify-center gap-4 bg-muted/20 border border-border/20 p-1 rounded-xl max-w-xs mx-auto">
+            <div className="flex items-center justify-center gap-2 bg-white/5 border border-white/10 p-1 rounded-xl max-w-xs mx-auto">
               <button
                 onClick={() => setTextMode(false)}
                 className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
                   !textMode
-                    ? "bg-background shadow text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-purple-600 text-white shadow-[0_0_15px_rgba(139,92,246,0.5)]"
+                    : "text-gray-400 hover:text-white"
                 }`}
               >
                 🎤 Voice Mode
@@ -753,8 +752,8 @@ export default function VoiceChatUI({
                 onClick={() => setTextMode(true)}
                 className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
                   textMode
-                    ? "bg-background shadow text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-purple-600 text-white shadow-[0_0_15px_rgba(139,92,246,0.5)]"
+                    : "text-gray-400 hover:text-white"
                 }`}
               >
                 ⌨️ Text Mode
@@ -763,7 +762,8 @@ export default function VoiceChatUI({
 
             <Button
               onClick={startInterview}
-              className="w-full py-6 gradient-bg hover:opacity-95 text-white font-bold text-md rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:shadow-primary/30 transition-all"
+              variant="gradient"
+              className="w-full py-6 text-white font-bold text-md rounded-xl shadow-[0_0_25px_rgba(139,92,246,0.4)] flex items-center justify-center gap-2 hover:shadow-[0_0_35px_rgba(139,92,246,0.6)] transition-all"
             >
               <Play className="w-5 h-5 fill-white" />
               Start Mock Interview
@@ -781,19 +781,19 @@ export default function VoiceChatUI({
     const avgConf = Math.round(evaluations.reduce((s, e) => s + e.confidenceScore, 0) / evaluations.length);
 
     const gradeColor = finalReport.grade.startsWith("A")
-      ? "text-emerald-500"
+      ? "text-emerald-400"
       : finalReport.grade.startsWith("B")
-      ? "text-primary"
+      ? "text-purple-400"
       : finalReport.grade.startsWith("C")
-      ? "text-amber-500"
-      : "text-rose-500";
+      ? "text-amber-400"
+      : "text-rose-400";
 
     const recommendationColor =
       finalReport.hiringRecommendation.includes("Hire")
-        ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
+        ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
         : finalReport.hiringRecommendation === "Borderline"
-        ? "text-amber-500 bg-amber-500/10 border-amber-500/20"
-        : "text-rose-500 bg-rose-500/10 border-rose-500/20";
+        ? "text-amber-400 bg-amber-500/10 border-amber-500/20"
+        : "text-rose-400 bg-rose-500/10 border-rose-500/20";
 
     return (
       <motion.div
@@ -801,32 +801,32 @@ export default function VoiceChatUI({
         animate={{ opacity: 1, y: 0 }}
         className="max-w-4xl mx-auto space-y-6"
       >
-        <Card className="relative overflow-hidden bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl p-6 sm:p-8 shadow-xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 pointer-events-none" />
+        <Card className="relative overflow-hidden bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(139,92,246,0.15)]">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 to-indigo-600/5 pointer-events-none" />
           <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-6">
             <div className="flex-1 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-xs font-bold rounded-full">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-bold rounded-full">
                 <Trophy className="w-3.5 h-3.5" />
                 Performance Report
               </div>
-              <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
+              <h2 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-300 tracking-tight">
                 Interview Completed!
               </h2>
-              <p className="text-muted-foreground text-sm leading-relaxed max-w-xl">
+              <p className="text-gray-400 text-sm leading-relaxed max-w-xl">
                 {finalReport.summary}
               </p>
-              <div className="flex items-center gap-4 text-xs font-bold text-muted-foreground">
-                <span className="flex items-center gap-1.5"><Timer className="w-3.5 h-3.5" /> {formatTime(interviewTimer)}</span>
+              <div className="flex items-center gap-4 text-xs font-bold text-gray-400">
+                <span className="flex items-center gap-1.5"><Timer className="w-3.5 h-3.5 text-purple-400" /> {formatTime(interviewTimer)}</span>
                 <span>•</span>
                 <span>{questions.length} questions completed</span>
               </div>
             </div>
 
             {/* Score Showcase */}
-            <div className="flex flex-col items-center justify-center p-6 bg-muted/40 border border-border/50 rounded-2xl shrink-0 text-center w-full md:w-56 space-y-3">
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Overall Grade</p>
-              <span className={`text-6xl font-black ${gradeColor} tracking-tight`}>{finalReport.grade}</span>
-              <span className="text-xs font-bold text-foreground">Score: {finalReport.overallScore}/100</span>
+            <div className="flex flex-col items-center justify-center p-6 bg-white/5 border border-white/10 rounded-2xl shrink-0 text-center w-full md:w-56 space-y-3 shadow-[0_0_25px_rgba(139,92,246,0.1)]">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Overall Grade</p>
+              <span className={`text-6xl font-black ${gradeColor} tracking-tight drop-shadow-[0_0_20px_rgba(139,92,246,0.3)]`}>{finalReport.grade}</span>
+              <span className="text-xs font-bold text-white">Score: {finalReport.overallScore}/100</span>
               <Badge variant="outline" className={`font-bold mt-1.5 ${recommendationColor}`}>
                 {finalReport.hiringRecommendation}
               </Badge>
@@ -835,9 +835,9 @@ export default function VoiceChatUI({
         </Card>
 
         {/* 3 Circular Averages */}
-        <Card className="bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl p-6">
-          <h3 className="font-extrabold text-foreground text-sm uppercase tracking-wider mb-6 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-primary" />
+        <Card className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
+          <h3 className="font-extrabold text-white text-sm uppercase tracking-wider mb-6 flex items-center gap-2">
+            <Activity className="w-4 h-4 text-purple-400" />
             Core Attributes Assessment
           </h3>
           <div className="grid grid-cols-3 gap-6 max-w-lg mx-auto">
@@ -849,30 +849,30 @@ export default function VoiceChatUI({
 
         {/* Strengths & Improvements */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl p-5 space-y-4">
-            <div className="flex items-center gap-2 text-emerald-500">
+          <Card className="bg-emerald-500/[0.03] backdrop-blur-xl border border-emerald-500/20 rounded-2xl p-5 space-y-4 shadow-[0_4px_20px_rgba(16,185,129,0.08)]">
+            <div className="flex items-center gap-2 text-emerald-400">
               <Star className="w-4 h-4" />
-              <h3 className="font-extrabold text-foreground text-sm">Key Strengths</h3>
+              <h3 className="font-extrabold text-white text-sm">Key Strengths</h3>
             </div>
             <ul className="space-y-2.5">
               {finalReport.topStrengths.map((s, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                <li key={i} className="flex items-start gap-2 text-xs text-gray-300 leading-relaxed">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
                   {s}
                 </li>
               ))}
             </ul>
           </Card>
 
-          <Card className="bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl p-5 space-y-4">
-            <div className="flex items-center gap-2 text-amber-500">
+          <Card className="bg-amber-500/[0.03] backdrop-blur-xl border border-amber-500/20 rounded-2xl p-5 space-y-4 shadow-[0_4px_20px_rgba(245,158,11,0.08)]">
+            <div className="flex items-center gap-2 text-amber-400">
               <Target className="w-4 h-4" />
-              <h3 className="font-extrabold text-foreground text-sm">Areas for Growth</h3>
+              <h3 className="font-extrabold text-white text-sm">Areas for Growth</h3>
             </div>
             <ul className="space-y-2.5">
               {finalReport.topImprovements.map((s, i) => (
-                <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
-                  <ArrowRight className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                <li key={i} className="flex items-start gap-2 text-xs text-gray-300 leading-relaxed">
+                  <ArrowRight className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
                   {s}
                 </li>
               ))}
@@ -882,29 +882,29 @@ export default function VoiceChatUI({
 
         {/* Study Topics & Next Steps */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl p-5 space-y-3">
-            <div className="flex items-center gap-2 text-primary">
+          <Card className="bg-purple-500/[0.03] backdrop-blur-xl border border-purple-500/20 rounded-2xl p-5 space-y-3 shadow-[0_4px_20px_rgba(139,92,246,0.1)]">
+            <div className="flex items-center gap-2 text-purple-400">
               <BookOpen className="w-4 h-4" />
-              <h3 className="font-extrabold text-foreground text-sm">Recommended Study Topics</h3>
+              <h3 className="font-extrabold text-white text-sm">Recommended Study Topics</h3>
             </div>
             <div className="flex flex-wrap gap-1.5 pt-1">
               {finalReport.studyTopics.map((topic, i) => (
-                <Badge key={i} variant="secondary" className="px-2.5 py-1 text-[11px] font-semibold bg-primary/5 border border-primary/10 text-primary rounded-full">
+                <Badge key={i} variant="secondary" className="px-2.5 py-1 text-[11px] font-semibold bg-purple-500/10 border border-purple-500/20 text-purple-300 rounded-full">
                   {topic}
                 </Badge>
               ))}
             </div>
           </Card>
 
-          <Card className="bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl p-5 space-y-2.5">
-            <p className="text-[10px] font-bold text-primary uppercase tracking-wider">Next Steps</p>
-            <p className="text-xs text-muted-foreground leading-relaxed">{finalReport.nextSteps}</p>
+          <Card className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-5 space-y-2.5 shadow-[0_4px_20px_rgba(139,92,246,0.08)]">
+            <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Next Steps</p>
+            <p className="text-xs text-gray-300 leading-relaxed">{finalReport.nextSteps}</p>
           </Card>
         </div>
 
         <Button
           onClick={resetInterview}
-          className="w-full py-3 bg-muted border border-border text-foreground hover:bg-muted/80 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+          className="w-full py-3 bg-white/5 border border-white/10 text-white hover:bg-white/10 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2"
         >
           <RotateCcw className="w-4 h-4" />
           Start a New Session
@@ -919,22 +919,22 @@ export default function VoiceChatUI({
   return (
     <div className="max-w-7xl mx-auto space-y-4">
       {/* Active Top Header */}
-      <div className="flex items-center justify-between bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl px-5 py-3.5 shadow-md">
+      <div className="flex items-center justify-between bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-3.5 shadow-[0_8px_32px_rgba(139,92,246,0.1)]">
         <div className="flex items-center gap-3">
           <div className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-primary" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-xs font-bold text-foreground">Interview for {targetRole}</h3>
+              <h3 className="text-xs font-bold text-white">Interview for {targetRole}</h3>
               {currentQuestion && <DifficultyBadge level={currentQuestion.difficulty} />}
             </div>
-            <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-semibold mt-0.5">
+            <div className="flex items-center gap-2 text-[10px] text-gray-400 font-semibold mt-0.5">
               <span>Question {Math.min(questions.length + 1, MAX_QUESTIONS)} of {MAX_QUESTIONS}</span>
               <span>•</span>
               <span className="font-mono flex items-center gap-1">
-                <Timer className="w-3 h-3" /> {formatTime(interviewTimer)}
+                <Timer className="w-3 h-3 text-purple-400" /> {formatTime(interviewTimer)}
               </span>
             </div>
           </div>
@@ -943,16 +943,16 @@ export default function VoiceChatUI({
         <Button
           variant="outline"
           onClick={resetInterview}
-          className="h-8 py-0 px-3 text-xs font-bold border-rose-500/20 hover:border-rose-500/40 hover:bg-rose-500/5 text-rose-500 hover:text-rose-500 transition-colors rounded-lg"
+          className="h-8 py-0 px-3 text-xs font-bold border-rose-500/20 hover:border-rose-500/40 hover:bg-rose-500/10 text-rose-400 hover:text-rose-300 transition-colors rounded-lg"
         >
           End Session
         </Button>
       </div>
 
       {/* Progress Line */}
-      <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
+      <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
         <motion.div
-          className="h-full gradient-bg"
+          className="h-full bg-gradient-to-r from-purple-600 to-indigo-600 shadow-[0_0_12px_rgba(139,92,246,0.8)]"
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.5 }}
         />
@@ -961,7 +961,7 @@ export default function VoiceChatUI({
       {/* Main Grid: Left Chat, Right Real-time Evaluation */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Chat Feed Column */}
-        <Card className="lg:col-span-8 flex flex-col h-[520px] bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl overflow-hidden shadow-xl">
+        <Card className="lg:col-span-8 flex flex-col h-[520px] bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(139,92,246,0.15)]">
           {/* Scrollable messages */}
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
             <AnimatePresence initial={false}>
@@ -981,8 +981,8 @@ export default function VoiceChatUI({
                     <div
                       className={`w-8 h-8 rounded-xl shrink-0 flex items-center justify-center border font-bold text-xs ${
                         isAI
-                          ? "bg-primary/10 border-primary/20 text-primary"
-                          : "bg-muted border-border text-foreground"
+                          ? "bg-purple-500/15 border-purple-500/30 text-purple-300"
+                          : "bg-white/10 border-white/20 text-white"
                       }`}
                     >
                       {isAI ? <Brain className="w-4 h-4" /> : <User className="w-4 h-4" />}
@@ -993,14 +993,14 @@ export default function VoiceChatUI({
                       <div
                         className={`p-3.5 rounded-2xl text-sm leading-relaxed border ${
                           isAI
-                            ? "bg-muted/40 border-border/30 rounded-tl-none text-foreground"
-                            : "bg-primary text-primary-foreground border-primary/10 rounded-tr-none"
+                            ? "bg-white/5 border-white/10 rounded-tl-none text-gray-200"
+                            : "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-500/30 rounded-tr-none shadow-[0_0_15px_rgba(139,92,246,0.3)]"
                         }`}
                       >
                         {msg.text}
                       </div>
                       <p
-                        className={`text-[9px] text-muted-foreground/60 font-semibold px-1 ${
+                        className={`text-[9px] text-gray-500 font-semibold px-1 ${
                           isAI ? "text-left" : "text-right"
                         }`}
                       >
@@ -1020,12 +1020,12 @@ export default function VoiceChatUI({
                   exit={{ opacity: 0 }}
                   className="flex items-start gap-2.5 mr-auto"
                 >
-                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-primary/10 border border-primary/20 text-primary font-bold text-xs">
+                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold text-xs">
                     <Brain className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
                     <ThinkingIndicator />
-                    <p className="text-[9px] text-muted-foreground/60 font-semibold italic">
+                    <p className="text-[9px] text-gray-400 font-semibold italic">
                       {phase === "finalizing" ? "Finalizing report..." : "Analyzing answer..."}
                     </p>
                   </div>
@@ -1040,14 +1040,14 @@ export default function VoiceChatUI({
                   animate={{ opacity: 1 }}
                   className="flex items-start gap-2.5 ml-auto flex-row-reverse max-w-[80%]"
                 >
-                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-muted border border-border text-foreground font-bold text-xs">
+                  <div className="w-8 h-8 rounded-xl shrink-0 flex items-center justify-center bg-white/10 border border-white/20 text-white font-bold text-xs">
                     <User className="w-4 h-4" />
                   </div>
                   <div className="space-y-1">
-                    <div className="p-3.5 rounded-2xl rounded-tr-none text-sm leading-relaxed bg-primary/5 border border-primary/20 text-primary italic">
+                    <div className="p-3.5 rounded-2xl rounded-tr-none text-sm leading-relaxed bg-purple-500/10 border border-purple-500/30 text-purple-200 italic">
                       {transcript}
                     </div>
-                    <p className="text-[9px] text-primary/60 font-semibold text-right animate-pulse">
+                    <p className="text-[9px] text-purple-400/80 font-semibold text-right animate-pulse">
                       Transcribing live...
                     </p>
                   </div>
@@ -1058,7 +1058,7 @@ export default function VoiceChatUI({
           </div>
 
           {/* Interactive controls and inputs */}
-          <div className="p-4 bg-muted/20 border-t border-border/50 space-y-3">
+          <div className="p-4 bg-black/40 border-t border-white/10 space-y-3 backdrop-blur-md">
             <div className="flex gap-2">
               {/* Mic Icon indicator / Button */}
               {!textMode && (
@@ -1070,8 +1070,8 @@ export default function VoiceChatUI({
                     whileTap={{ scale: 0.95 }}
                     className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-all ${
                       isListening
-                        ? "bg-rose-500 text-white border-rose-600 shadow-lg shadow-rose-500/25"
-                        : "bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 border-rose-500/30 disabled:opacity-40"
+                        ? "bg-rose-500 text-white border-rose-600 shadow-[0_0_20px_rgba(244,63,94,0.5)]"
+                        : "bg-rose-500/15 text-rose-400 hover:bg-rose-500/25 border-rose-500/30 disabled:opacity-40"
                     }`}
                   >
                     {isListening ? (
@@ -1112,7 +1112,7 @@ export default function VoiceChatUI({
                       : "Click 'Start Speaking' or switch to text mode..."
                   }
                   rows={1}
-                  className="w-full py-3 pl-4 pr-12 bg-background border border-border/80 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl text-sm text-foreground placeholder:text-muted-foreground/60 resize-none transition-all outline-none"
+                  className="w-full py-3 pl-4 pr-12 bg-white/5 border border-white/10 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 rounded-xl text-sm text-white placeholder:text-gray-500 resize-none transition-all outline-none"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -1123,7 +1123,7 @@ export default function VoiceChatUI({
                 
                 {/* Visual indicator of recording duration */}
                 {!textMode && timer > 0 && isListening && (
-                  <span className="absolute right-3 text-[10px] text-rose-500 font-mono font-bold bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20 animate-pulse">
+                  <span className="absolute right-3 text-[10px] text-rose-400 font-mono font-bold bg-rose-500/15 px-2 py-0.5 rounded-md border border-rose-500/30 animate-pulse">
                     {formatTime(timer)}
                   </span>
                 )}
@@ -1140,22 +1140,23 @@ export default function VoiceChatUI({
                   phase === "evaluating" ||
                   phase === "finalizing"
                 }
-                className="w-12 h-12 p-0 gradient-bg text-white rounded-xl flex items-center justify-center shrink-0 shadow-md shadow-primary/10 disabled:opacity-40"
+                variant="gradient"
+                className="w-12 h-12 p-0 rounded-xl flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(139,92,246,0.4)] disabled:opacity-40"
               >
                 <Send className="w-4.5 h-4.5 fill-white" />
               </Button>
             </div>
 
             {/* Bottom Row status and Switch mode link */}
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground px-1">
+            <div className="flex items-center justify-between text-[11px] text-gray-400 px-1">
               <div>
                 {aiSpeaking ? (
-                  <div className="flex items-center gap-1 text-primary font-bold">
+                  <div className="flex items-center gap-1.5 text-purple-400 font-bold">
                     <Volume2 className="w-3.5 h-3.5 animate-bounce" />
                     <span>AI Interviewer is speaking...</span>
                   </div>
                 ) : isListening ? (
-                  <div className="flex items-center gap-2 text-rose-500 font-bold">
+                  <div className="flex items-center gap-2 text-rose-400 font-bold">
                     <MicVisualizer active={isListening} />
                     <span>Listening...</span>
                   </div>
@@ -1169,7 +1170,7 @@ export default function VoiceChatUI({
                   stopListening();
                   setTextMode(!textMode);
                 }}
-                className="hover:text-primary font-bold transition-colors"
+                className="hover:text-purple-400 text-gray-300 font-bold transition-colors"
               >
                 Switch to {textMode ? "🎤 Voice" : "⌨️ Text"} Mode
               </button>
@@ -1178,10 +1179,10 @@ export default function VoiceChatUI({
         </Card>
 
         {/* Real-time Evaluation Column */}
-        <Card className="lg:col-span-4 bg-card/40 backdrop-blur-md border border-border/50 rounded-2xl p-5 shadow-xl flex flex-col h-[520px] overflow-y-auto space-y-4">
-          <div className="flex items-center gap-2 border-b border-border/20 pb-3">
-            <TrendingUp className="w-4 h-4 text-primary" />
-            <h3 className="font-extrabold text-foreground text-sm uppercase tracking-wider">
+        <Card className="lg:col-span-4 bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-[0_8px_32px_rgba(139,92,246,0.15)] flex flex-col h-[520px] overflow-y-auto space-y-4">
+          <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+            <TrendingUp className="w-4 h-4 text-purple-400" />
+            <h3 className="font-extrabold text-white text-sm uppercase tracking-wider">
               Real-time Metrics
             </h3>
           </div>
@@ -1196,7 +1197,7 @@ export default function VoiceChatUI({
                 className="space-y-4 flex-1 flex flex-col"
               >
                 {/* 3 attribute circular indicators */}
-                <div className="grid grid-cols-3 gap-2 py-2 border-b border-border/10">
+                <div className="grid grid-cols-3 gap-2 py-2 border-b border-white/10">
                   <CircularProgress
                     score={currentEvaluation.technicalScore}
                     label="Tech"
@@ -1215,30 +1216,30 @@ export default function VoiceChatUI({
                 </div>
 
                 {/* Score Banner */}
-                <div className="bg-primary/5 border border-primary/10 rounded-xl p-3.5 text-center space-y-0.5">
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+                <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3.5 text-center space-y-0.5">
+                  <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
                     Answer Score
                   </span>
-                  <div className="text-3xl font-black text-primary">
+                  <div className="text-3xl font-black text-purple-400 drop-shadow-[0_0_10px_rgba(139,92,246,0.4)]">
                     {currentEvaluation.overallScore}
-                    <span className="text-xs text-muted-foreground font-semibold">/100</span>
+                    <span className="text-xs text-gray-400 font-semibold">/100</span>
                   </div>
                 </div>
 
                 {/* Feedback Text */}
                 <div className="space-y-1.5">
-                  <h4 className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider flex items-center gap-1">
-                    <MessageSquare className="w-3.5 h-3.5" />
+                  <h4 className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                    <MessageSquare className="w-3.5 h-3.5 text-purple-400" />
                     Live Analysis
                   </h4>
-                  <p className="text-xs text-foreground leading-relaxed italic bg-muted/40 p-3 rounded-xl border border-border/30">
+                  <p className="text-xs text-gray-200 leading-relaxed italic bg-white/5 p-3 rounded-xl border border-white/10">
                     &quot;{currentEvaluation.feedback}&quot;
                   </p>
                 </div>
 
                 {/* Strengths tags */}
                 <div className="space-y-1.5">
-                  <h4 className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                  <h4 className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                     Strengths
                   </h4>
                   <div className="flex flex-wrap gap-1">
@@ -1246,7 +1247,7 @@ export default function VoiceChatUI({
                       <Badge
                         key={idx}
                         variant="secondary"
-                        className="text-[9px] font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 py-0.5 px-2 rounded"
+                        className="text-[9px] font-semibold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 py-0.5 px-2 rounded"
                       >
                         {s}
                       </Badge>
@@ -1256,7 +1257,7 @@ export default function VoiceChatUI({
 
                 {/* Improvements tags */}
                 <div className="space-y-1.5">
-                  <h4 className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
+                  <h4 className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                     Areas to Improve
                   </h4>
                   <div className="flex flex-wrap gap-1">
@@ -1264,7 +1265,7 @@ export default function VoiceChatUI({
                       <Badge
                         key={idx}
                         variant="secondary"
-                        className="text-[9px] font-semibold bg-amber-500/10 border border-amber-500/20 text-amber-500 py-0.5 px-2 rounded"
+                        className="text-[9px] font-semibold bg-amber-500/10 border border-amber-500/20 text-amber-400 py-0.5 px-2 rounded"
                       >
                         {s}
                       </Badge>
@@ -1280,12 +1281,12 @@ export default function VoiceChatUI({
                 exit={{ opacity: 0 }}
                 className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-4"
               >
-                <div className="w-16 h-16 rounded-2xl bg-muted/40 border border-border/50 flex items-center justify-center shadow-inner">
-                  <Activity className="w-7 h-7 text-muted-foreground/50 animate-pulse" />
+                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-inner">
+                  <Activity className="w-7 h-7 text-purple-400/50 animate-pulse" />
                 </div>
                 <div className="space-y-1 max-w-[200px]">
-                  <p className="text-xs font-bold text-foreground">Awaiting Assessment</p>
-                  <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  <p className="text-xs font-bold text-white">Awaiting Assessment</p>
+                  <p className="text-[10px] text-gray-400 leading-relaxed">
                     Once you submit your first response, AI metrics will populate here in real-time.
                   </p>
                 </div>

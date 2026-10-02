@@ -33,30 +33,30 @@ export default function PortfolioPreview({ html, onRegenerate, isLoading }: Port
 
   // Dynamic width helper for the iframe container
   const getDeviceWidth = () => {
-    if (previewDevice === "mobile") return "max-w-[375px] h-[720px] rounded-3xl border-4 border-zinc-800 shadow-xl overflow-hidden my-4";
-    if (previewDevice === "tablet") return "max-w-[768px] h-[750px] border-x border-white/5";
-    return "max-w-full h-[750px] border-x border-white/5";
+    if (previewDevice === "mobile") return "max-w-[375px] h-[720px] rounded-3xl border-4 border-zinc-800 shadow-[0_0_30px_rgba(139,92,246,0.3)] overflow-hidden my-4";
+    if (previewDevice === "tablet") return "max-w-[768px] h-[750px] border-x border-white/10";
+    return "max-w-full h-[750px] border-x border-white/10";
   };
 
   return (
-    <div className="glass-card border border-white/5 rounded-2xl overflow-hidden shadow-2xl bg-zinc-950/40">
+    <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(139,92,246,0.15)]">
       {/* Premium Browser Toolbar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-b border-white/5 bg-zinc-950/50">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 py-4 border-b border-white/10 bg-black/40 backdrop-blur-md">
         <div className="flex items-center gap-3">
           {/* Traffic light circles */}
           <div className="flex gap-1.5 shrink-0">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
-            <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
           </div>
           
-          <div className="bg-zinc-900 border border-white/5 rounded-lg px-3 py-1 text-[11px] font-semibold text-gray-400">
-            my-portfolio.html
+          <div className="bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-[11px] font-mono text-purple-300">
+            preview://my-portfolio.html
           </div>
         </div>
 
         {/* Device Switcher */}
-        <div className="flex bg-zinc-900/80 p-0.5 rounded-lg border border-white/5 shrink-0">
+        <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 shrink-0">
           {[
             { id: "desktop", icon: Monitor, label: "Desktop" },
             { id: "tablet", icon: Tablet, label: "Tablet" },
@@ -65,10 +65,10 @@ export default function PortfolioPreview({ html, onRegenerate, isLoading }: Port
             <button
               key={device.id}
               onClick={() => setPreviewDevice(device.id as any)}
-              className={`p-1.5 rounded-md transition-all cursor-pointer ${
+              className={`p-1.5 px-2.5 rounded-lg transition-all cursor-pointer ${
                 previewDevice === device.id
-                  ? "bg-indigo-500/15 text-indigo-400 border border-indigo-500/20"
-                  : "text-muted-foreground hover:text-foreground border border-transparent"
+                  ? "bg-purple-600/20 text-purple-300 border border-purple-500/40 shadow-[0_0_15px_rgba(139,92,246,0.3)]"
+                  : "text-gray-400 hover:text-white border border-transparent"
               }`}
               title={device.label}
               type="button"
@@ -84,24 +84,24 @@ export default function PortfolioPreview({ html, onRegenerate, isLoading }: Port
             <button
               onClick={onRegenerate}
               disabled={isLoading}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-zinc-900 border border-white/5 rounded-xl text-gray-300 hover:text-white transition-all disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-white/5 border border-white/10 rounded-xl text-gray-300 hover:text-white hover:border-purple-500/30 transition-all disabled:opacity-50 cursor-pointer"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-indigo-400 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-purple-400 ${isLoading ? "animate-spin" : ""}`} />
               <span>Regenerate</span>
             </button>
           )}
           
           <button
             onClick={openInNewTab}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-zinc-900 border border-white/5 rounded-xl text-gray-300 hover:text-white transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-white/5 border border-white/10 rounded-xl text-gray-300 hover:text-white hover:border-purple-500/30 transition-all cursor-pointer"
           >
-            <ExternalLink className="w-3.5 h-3.5 text-indigo-400" />
+            <ExternalLink className="w-3.5 h-3.5 text-purple-400" />
             <span>Open Tab</span>
           </button>
           
           <button
             onClick={downloadHtml}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold bg-gradient-to-r from-indigo-500 to-violet-600 hover:opacity-95 text-white rounded-xl shadow-md transition-all hover:scale-[1.01] cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all hover:scale-[1.02] active:scale-[0.98] shimmer cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Download HTML</span>
@@ -111,14 +111,14 @@ export default function PortfolioPreview({ html, onRegenerate, isLoading }: Port
 
       {/* iframe Preview Container */}
       <div 
-        className="relative flex justify-center items-center bg-zinc-950/20 px-4 transition-all duration-300" 
+        className="relative flex justify-center items-center bg-black/50 px-4 transition-all duration-300" 
         style={{ minHeight: "750px" }}
       >
         {isLoading ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/60 backdrop-blur-sm z-20">
-            <Loader2 className="w-8 h-8 text-indigo-500 animate-spin mb-3" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm z-20">
+            <Loader2 className="w-8 h-8 text-purple-400 animate-spin mb-3" />
             <p className="text-sm font-bold text-gray-200">Rebuilding your portfolio...</p>
-            <p className="text-xs text-muted-foreground mt-1">Applying templates and components</p>
+            <p className="text-xs text-gray-400 mt-1">Applying templates and components</p>
           </div>
         ) : (
           <div className={`w-full transition-all duration-300 flex justify-center ${previewDevice === "mobile" ? "" : "h-[750px]"}`}>

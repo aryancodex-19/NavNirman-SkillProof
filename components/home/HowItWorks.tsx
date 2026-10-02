@@ -8,43 +8,46 @@ import GlassCard from "@/components/ui/GlassCard";
 const STEPS = [
   {
     step: "01",
-    title: "Connect Profile",
-    description: "Enter your skills and target roles, or link your existing resume file to kickstart the system context.",
+    title: "Connect Profile & Goals",
+    description: "Enter your skills, target roles, or upload your resume to build your unique career footprint.",
     icon: UserPlus,
-    glow: "indigo" as const,
+    glow: "purple" as const,
   },
   {
     step: "02",
-    title: "AI Optimization",
-    description: "Use all 9 specialized instruments to tailor documents, complete mocks, and track DSA progress.",
+    title: "AI Analysis & Mocks",
+    description: "Use all 9 specialized instruments to tailor documents, complete voice mocks, and track coding progress.",
     icon: Sparkles,
     glow: "violet" as const,
   },
   {
     step: "03",
-    title: "Get Hired",
-    description: "Submit resume drafts, nail interviews with mock experience, and land top roles.",
+    title: "Get Hired with Proof",
+    description: "Submit certified ATS-optimized applications, nail interviews, and land top software positions.",
     icon: Trophy,
-    glow: "pink" as const,
+    glow: "indigo" as const,
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="py-20 relative overflow-hidden bg-zinc-950/40">
+    <section className="py-24 relative overflow-hidden bg-black/40">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-          <h2 className="text-3xl font-black text-white">
-            Simple Path to Professional Success
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+            Simple Path to{" "}
+            <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              Career Excellence
+            </span>
           </h2>
           <p className="text-gray-400 text-sm leading-relaxed">
-            Follow our 3-step structured timeline to elevate your career assets and stand out to recruiters.
+            Follow our 3-step structured process to elevate your technical profile and stand out to recruiters.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
           {/* Connector Line (visible on desktop) */}
-          <div className="absolute top-1/2 left-[15%] right-[15%] h-[1px] bg-gradient-to-r from-indigo-500/20 via-violet-500/20 to-pink-500/20 -translate-y-1/2 hidden md:block z-0 pointer-events-none" />
+          <div className="absolute top-1/2 left-[15%] right-[15%] h-[1px] bg-gradient-to-r from-purple-500/30 via-indigo-500/30 to-purple-500/30 -translate-y-1/2 hidden md:block z-0 pointer-events-none" />
 
           {STEPS.map((item, i) => (
             <motion.div
@@ -57,15 +60,15 @@ export default function HowItWorks() {
             >
               <GlassCard
                 glowColor={item.glow}
-                className="p-8 flex flex-col justify-between h-72 border-white/5 hover:scale-[1.02] transition-transform"
+                className="p-8 flex flex-col justify-between h-72 border-white/10 hover:scale-[1.02] transition-transform"
               >
                 <div className="space-y-6">
                   {/* Step Header */}
                   <div className="flex items-center justify-between">
-                    <div className="h-12 w-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-indigo-400">
+                    <div className="h-12 w-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
                       <item.icon className="h-5 w-5" />
                     </div>
-                    <span className="text-3xl font-black bg-gradient-to-r from-indigo-500/30 to-violet-500/30 bg-clip-text text-transparent">
+                    <span className="text-4xl font-black bg-gradient-to-r from-purple-400/40 to-indigo-400/40 bg-clip-text text-transparent">
                       {item.step}
                     </span>
                   </div>
@@ -81,7 +84,7 @@ export default function HowItWorks() {
                   </div>
                 </div>
 
-                <div className="h-1.5 w-12 rounded-full bg-indigo-500/25 mt-4" />
+                <div className="h-1 w-12 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 mt-4" />
               </GlassCard>
             </motion.div>
           ))}

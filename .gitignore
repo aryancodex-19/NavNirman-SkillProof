@@ -43,6 +43,9 @@ next-env.d.ts
 # clerk configuration (can include secrets)
 /.clerk/
 
+# kilo agent manager (worktrees)
+/.kilo/
+
 # Local database files
 *.db
 *.sqlite

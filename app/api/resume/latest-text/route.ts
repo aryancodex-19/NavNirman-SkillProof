@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/prisma";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const { userId: clerkId } = await auth();
 

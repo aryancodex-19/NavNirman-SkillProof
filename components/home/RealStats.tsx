@@ -19,9 +19,9 @@ export default function RealStats({ stats }: RealStatsProps) {
     {
       label: "Active Students",
       value: stats.totalUsers.toLocaleString(),
-      description: "Building their futures on CareerOS",
+      description: "Building their futures on SkillProof",
       icon: Users,
-      glow: "indigo" as const,
+      glow: "purple" as const,
     },
     {
       label: "Resumes Built",
@@ -35,7 +35,7 @@ export default function RealStats({ stats }: RealStatsProps) {
       value: stats.totalAtsScans.toLocaleString(),
       description: "Compatibility reports generated",
       icon: ScanSearch,
-      glow: "pink" as const,
+      glow: "purple" as const,
     },
     {
       label: "Mock Interviews Done",
@@ -50,11 +50,14 @@ export default function RealStats({ stats }: RealStatsProps) {
     <section className="py-20 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
-          <h2 className="text-3xl font-black text-white">
-            Built by Students, Proven by Metrics
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+            Built for Students,{" "}
+            <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              Proven by Metrics
+            </span>
           </h2>
           <p className="text-gray-400 text-sm leading-relaxed">
-            Real-time aggregate activity across CareerOS. No arbitrary assertions—just absolute platform engagement numbers.
+            Real-time aggregate activity across SkillProof. No arbitrary claims—just transparent platform metrics.
           </p>
         </div>
 
@@ -69,19 +72,21 @@ export default function RealStats({ stats }: RealStatsProps) {
             >
               <GlassCard
                 glowColor={card.glow}
-                className="p-6 flex flex-col justify-between h-48 group hover:scale-[1.03] transition-all"
+                className="p-6 flex flex-col justify-between h-52 group hover:scale-[1.03] transition-all duration-300"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                     {card.label}
                   </span>
-                  <card.icon className="h-5 w-5 text-indigo-400 group-hover:scale-110 transition-transform" />
+                  <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform">
+                    <card.icon className="h-4 w-4" />
+                  </div>
                 </div>
-                <div className="mt-6">
-                  <p className="text-4xl font-black text-white tracking-tight">
+                <div className="mt-4">
+                  <p className="text-4xl font-extrabold text-white tracking-tight bg-gradient-to-b from-white to-gray-300 bg-clip-text">
                     {card.value}
                   </p>
-                  <p className="text-[11px] text-muted-foreground mt-2 font-medium">
+                  <p className="text-xs text-gray-400 mt-2 font-medium">
                     {card.description}
                   </p>
                 </div>

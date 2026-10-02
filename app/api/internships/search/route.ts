@@ -86,7 +86,7 @@ Score all ${MOCK_INTERNSHIPS.length} internships. Be strict but fair.`;
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const { userId: clerkId } = await auth();
     if (!clerkId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
