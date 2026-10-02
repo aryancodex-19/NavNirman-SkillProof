@@ -20,6 +20,7 @@ import {
   GitGraph,
   ShieldCheck,
   TrendingUp,
+  Sparkles,
   PanelLeftClose,
   PanelLeftOpen,
   type LucideIcon,
@@ -50,7 +51,8 @@ const NAV_GROUPS: { name: string; items: { label: string; href: string; icon: Lu
       { label: "Portfolio Generator", href: "/dashboard/portfolio", icon: Layout },
       { label: "LinkedIn Optimizer", href: "/dashboard/linkedin", icon: Share2 },
       { label: "GitHub Analysis", href: "/dashboard/github", icon: GitGraph },
-    ],
+      { label: "SkillProof", href: "/dashboard/skillproof", icon: Sparkles },
+    ]
   },
   {
     name: "Practice & Search",

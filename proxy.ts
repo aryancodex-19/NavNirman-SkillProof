@@ -12,6 +12,7 @@ const isProtectedRoute = createRouteMatcher([
   "/api/github(.*)",
   "/api/coding(.*)",
   "/api/ats(.*)",
+  "/api/skillproof(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
