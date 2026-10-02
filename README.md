@@ -191,69 +191,8 @@ If time permits, SkillProof can also provide a short role-specific micro-task to
 
 # ⚙️ SkillProof Workflow
 
-┌─────────────────────┐
-│     Résumé PDF      │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ Extract Claimed     │
-│ Skills & Profile    │
-└──────────┬──────────┘
-           │
-           │
-           ▼
-┌─────────────────────┐
-│   GitHub Username    │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│ GitHub Evidence      │
-│ Analysis             │
-└──────────┬──────────┘
-           │
-           ▼
-┌────────────────────────────┐
-│ Evidence-Based Assessment  │
-│                            │
-│  Proven / Partial /        │
-│  Claimed-only              │
-└──────────┬─────────────────┘
-           │
-           ▼
-┌────────────────────────────┐
-│      Evidence Trail        │
-│                            │
-│ Repositories / Files /     │
-│ Commits / Tests / PRs      │
-└──────────┬─────────────────┘
-           │
-           │
-           ▼
-┌─────────────────────┐
-│   Target Job / JD   │
-└──────────┬──────────┘
-           │
-           ▼
-┌────────────────────────────┐
-│ Required Skill Extraction  │
-│ & Skill Normalization      │
-└──────────┬─────────────────┘
-           │
-           ▼
-┌────────────────────────────┐
-│ Job-Readiness Gap Report   │
-│                            │
-│ Supported / Insufficient / │
-│ Missing Skills             │
-└──────────┬─────────────────┘
-           │
-           ▼
-┌────────────────────────────┐
-│ Role-Specific Microtasks   │
-│ for Identified Skill Gaps  │
-└────────────────────────────┘
+<img width="1161" height="1355" alt="image" src="https://github.com/user-attachments/assets/8756bf78-b439-4157-a241-1bc9b2626f47" />
+
 
 ## 🛠️ Tech Stack
 
@@ -323,3 +262,18 @@ npx prisma db push
 
 # Run development server
 npm run dev
+```
+
+## 📸 Screenshots / Demo
+
+<img width="1917" height="913" alt="image" src="https://github.com/user-attachments/assets/6f1f096d-7ca8-4359-aea1-497fbabbfa57" />
+<img width="1917" height="911" alt="image" src="https://github.com/user-attachments/assets/f2fcd281-2b5a-4e55-a8ce-2f49f2ae7628" />
+
+## 👥 Team Members
+
+| # | Team Member |
+|---|---|
+| 1 | **Utkarsh Pandey** |
+| 2 | **Aryan Pal** |
+| 3 | **Shashank Sharma** |
+| 4 | **Ravi Niranjan Sharma** |
