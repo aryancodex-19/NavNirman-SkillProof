@@ -1,9 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { SignUp } from "@clerk/nextjs";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Loader2 } from "lucide-react";
 
 export default function SignUpPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
       {/* Background gradient */}
@@ -37,30 +44,37 @@ export default function SignUpPage() {
         </div>
 
         {/* Clerk SignUp */}
-        <div className="glass rounded-2xl p-6 shadow-xl">
-          <SignUp
-            routing="hash"
-            forceRedirectUrl="/dashboard"
-            fallbackRedirectUrl="/dashboard"
-            appearance={{
-              elements: {
-                formButtonPrimary:
-                  "bg-primary hover:bg-primary-hover text-primary-foreground shadow-lg",
-                card: "bg-transparent shadow-none",
-                headerTitle: "hidden",
-                headerSubtitle: "hidden",
-                socialButtonsBlockButton:
-                  "border-border bg-card hover:bg-muted text-foreground",
-                socialButtonsBlockButtonText: "text-foreground font-medium",
-                formFieldInput:
-                  "border-input bg-card text-foreground rounded-xl",
-                formFieldLabel: "text-foreground",
-                footerActionLink: "text-primary hover:text-primary-hover",
-                identityPreviewEditButton: "text-primary",
-                formResendCodeLink: "text-primary",
-              },
-            }}
-          />
+        <div className="glass rounded-2xl p-6 shadow-xl min-h-[420px] flex items-center justify-center">
+          {mounted ? (
+            <SignUp
+              routing="hash"
+              forceRedirectUrl="/dashboard"
+              fallbackRedirectUrl="/dashboard"
+              appearance={{
+                elements: {
+                  formButtonPrimary:
+                    "bg-primary hover:bg-primary-hover text-primary-foreground shadow-lg",
+                  card: "bg-transparent shadow-none w-full",
+                  headerTitle: "hidden",
+                  headerSubtitle: "hidden",
+                  socialButtonsBlockButton:
+                    "border-border bg-card hover:bg-muted text-foreground",
+                  socialButtonsBlockButtonText: "text-foreground font-medium",
+                  formFieldInput:
+                    "border-input bg-card text-foreground rounded-xl",
+                  formFieldLabel: "text-foreground",
+                  footerActionLink: "text-primary hover:text-primary-hover",
+                  identityPreviewEditButton: "text-primary",
+                  formResendCodeLink: "text-primary",
+                },
+              }}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 space-y-3">
+              <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+              <p className="text-xs text-muted-foreground">Loading sign up...</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

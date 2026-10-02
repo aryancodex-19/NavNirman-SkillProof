@@ -19,6 +19,8 @@ interface DocQualityProps {
       hasDescription: boolean;
       readmeLength: number;
       hasSetupInstructions: boolean;
+      readmeUrl?: string;
+      licenseUrl?: string | null;
       docScore: number;
     }[];
   };
@@ -141,22 +143,40 @@ export default function DocQuality({ data }: DocQualityProps) {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
-                  {/* Checkmark indicators */}
-                  <div className="flex items-center gap-1">
+                  {/* Checkmark indicators with deep-links */}
+                  <div className="flex items-center gap-1.5">
                     {repo.hasReadme ? (
-                      <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                      <a
+                        href={repo.readmeUrl || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="View README file"
+                        className="hover:scale-110 transition-transform"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      </a>
                     ) : (
-                      <XCircle className="w-3 h-3 text-red-400/50" />
+                      <XCircle className="w-3.5 h-3.5 text-red-400/50" />
                     )}
                     {repo.hasLicense ? (
-                      <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                      <a
+                        href={repo.licenseUrl || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="View License file"
+                        className="hover:scale-110 transition-transform"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      </a>
                     ) : (
-                      <XCircle className="w-3 h-3 text-red-400/50" />
+                      <XCircle className="w-3.5 h-3.5 text-red-400/50" />
                     )}
                     {repo.hasSetupInstructions ? (
-                      <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                      <span title="Setup Instructions Detected">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      </span>
                     ) : (
-                      <XCircle className="w-3 h-3 text-red-400/50" />
+                      <XCircle className="w-3.5 h-3.5 text-red-400/50" />
                     )}
                   </div>
                   <span

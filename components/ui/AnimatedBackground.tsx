@@ -17,7 +17,7 @@ function AnimatedBackground() {
       
       {/* Floating Orb 1: Indigo */}
       <motion.div
-        className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[130px]"
+        className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[120px] will-change-transform [transform:translate3d(0,0,0)]"
         animate={{
           x: [0, 80, -40, 0],
           y: [0, -60, 50, 0],
@@ -32,7 +32,7 @@ function AnimatedBackground() {
 
       {/* Floating Orb 2: Violet */}
       <motion.div
-        className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-violet-600/8 blur-[150px]"
+        className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-violet-600/8 blur-[120px] will-change-transform [transform:translate3d(0,0,0)]"
         animate={{
           x: [0, -90, 60, 0],
           y: [0, 80, -70, 0],
@@ -47,7 +47,7 @@ function AnimatedBackground() {
 
       {/* Floating Orb 3: Pink */}
       <motion.div
-        className="absolute top-[35%] right-[20%] w-[450px] h-[450px] rounded-full bg-pink-500/5 blur-[120px]"
+        className="absolute top-[35%] right-[20%] w-[450px] h-[450px] rounded-full bg-pink-500/5 blur-[100px] will-change-transform [transform:translate3d(0,0,0)]"
         animate={{
           x: [0, 100, -80, 0],
           y: [0, 120, -90, 0],

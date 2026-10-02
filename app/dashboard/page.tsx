@@ -1,11 +1,11 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
+import { getOrCreateCurrentUser } from "@/lib/auth/syncUser";
 import dynamic from "next/dynamic";
 import LoadingSkeleton from "@/components/ui/LoadingSkeleton";
 import WelcomeBanner from "@/components/dashboard/WelcomeBanner";
 import RealStatsCards from "@/components/dashboard/RealStatsCards";
-import Link from "next/link";
 import PageTransition from "@/components/ui/PageTransition";
 import GlassCard from "@/components/ui/GlassCard";
 import { Clock } from "lucide-react";
@@ -87,72 +87,50 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
-  const clerkUser = await currentUser();
-  const dbUser = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  });
+  const dbUser = await getOrCreateCurrentUser();
 
   const db = prisma as any;
 
-  const displayName = dbUser?.name || clerkUser?.firstName || "Student";
+  const displayName = dbUser?.name || "Student";
   const targetRole = dbUser?.targetRole;
 
-  // Real data calculations
-  const resumesCount = dbUser
-    ? await db.resume.count({
-        where: { userId: dbUser.id },
-      })
-    : 0;
+  // Real data calculations (fetched concurrently in a single round-trip batch)
+  const [
+    resumesCount,
+    avgAtsAggregate,
+    interviewSessionsCount,
+    voiceInterviewsCount,
+    mentorChatsCount,
+    savedJobsCount,
+    codingProgressList,
+    gitHubAnalysisRecord,
+  ] = dbUser
+    ? await Promise.all([
+        db.resume.count({ where: { userId: dbUser.id } }),
+        db.aTSScan.aggregate({
+          where: { userId: dbUser.id },
+          _avg: { score: true },
+        }),
+        db.interviewSession.count({ where: { userId: dbUser.id } }),
+        db.voiceInterview.count({ where: { userId: dbUser.id } }),
+        db.mentorChat.count({ where: { userId: dbUser.id } }),
+        db.savedJob.count({ where: { userId: dbUser.id } }),
+        db.codingProgress.findMany({ where: { userId: dbUser.id } }),
+        db.gitHubAnalysis.findUnique({ where: { userId: dbUser.id } }),
+      ])
+    : [0, null, 0, 0, 0, 0, [], null];
 
-  const avgAtsAggregate = dbUser
-    ? await db.aTSScan.aggregate({
-        where: { userId: dbUser.id },
-        _avg: { score: true },
-      })
-    : null;
   const avgAtsScoreNum = avgAtsAggregate?._avg?.score;
-  const avgAtsScore = avgAtsScoreNum !== null && avgAtsScoreNum !== undefined
-    ? `${Math.round(avgAtsScoreNum)}%`
-    : "—";
+  const avgAtsScore =
+    avgAtsScoreNum !== null && avgAtsScoreNum !== undefined
+      ? `${Math.round(avgAtsScoreNum)}%`
+      : "—";
 
-  const interviewSessionsCount = dbUser
-    ? await db.interviewSession.count({
-        where: { userId: dbUser.id },
-      })
-    : 0;
+  const maxStreak =
+    codingProgressList.length > 0
+      ? Math.max(...codingProgressList.map((c: any) => c.streak))
+      : 0;
 
-  const voiceInterviewsCount = dbUser
-    ? await db.voiceInterview.count({
-        where: { userId: dbUser.id },
-      })
-    : 0;
-
-  const mentorChatsCount = dbUser
-    ? await db.mentorChat.count({
-        where: { userId: dbUser.id },
-      })
-    : 0;
-
-  const savedJobsCount = dbUser
-    ? await db.savedJob.count({
-        where: { userId: dbUser.id },
-      })
-    : 0;
-
-  const codingProgressList = dbUser
-    ? await db.codingProgress.findMany({
-        where: { userId: dbUser.id },
-      })
-    : [];
-  const maxStreak = codingProgressList.length > 0
-    ? Math.max(...codingProgressList.map((c: any) => c.streak))
-    : 0;
-
-  const gitHubAnalysisRecord = dbUser
-    ? await db.gitHubAnalysis.findUnique({
-        where: { userId: dbUser.id },
-      })
-    : null;
   const githubScore = gitHubAnalysisRecord?.overallScore;
 
   // Get module badge based on real data

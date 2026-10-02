@@ -34,13 +34,40 @@ export default function GitHubAnalysisClient({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
 
+  const runAnalysis = useCallback(async () => {
+    setIsAnalyzing(true);
+    try {
+      const res = await fetch("/api/github/analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Analysis failed");
+        return;
+      }
+
+      setAnalysisData(data);
+      toast.success("GitHub analysis complete!");
+    } catch (err: any) {
+      toast.error(err.message || "Analysis failed");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, []);
+
+  const handleAnalyze = useCallback(async () => {
+    await runAnalysis();
+  }, [runAnalysis]);
+
   // Auto-trigger analysis if connected but no data
   useEffect(() => {
     if (isConnected && !analysisData && !isAnalyzing) {
       handleAnalyze();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isConnected, analysisData, isAnalyzing, handleAnalyze]);
 
   const handleConnect = useCallback(
     async (enteredUsername: string, token?: string) => {
@@ -71,7 +98,7 @@ export default function GitHubAnalysisClient({
         setIsConnecting(false);
       }
     },
-    []
+    [runAnalysis]
   );
 
   const handleDisconnect = useCallback(async () => {
@@ -88,34 +115,6 @@ export default function GitHubAnalysisClient({
     } catch (err: any) {
       toast.error(err.message || "Disconnect failed");
     }
-  }, []);
-
-  const runAnalysis = async () => {
-    setIsAnalyzing(true);
-    try {
-      const res = await fetch("/api/github/analysis", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error || "Analysis failed");
-        return;
-      }
-
-      setAnalysisData(data);
-      toast.success("GitHub analysis complete!");
-    } catch (err: any) {
-      toast.error(err.message || "Analysis failed");
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
-  const handleAnalyze = useCallback(async () => {
-    await runAnalysis();
   }, []);
 
   // ── Not Connected State ──
@@ -203,6 +202,7 @@ export default function GitHubAnalysisClient({
         docScore={analysisData.documentation?.score || 0}
         level={analysisData.level}
         recommendations={analysisData.recommendations || []}
+        evidenceSummary={analysisData.evidenceSummary}
       />
 
       {/* Activity & Languages Row */}
