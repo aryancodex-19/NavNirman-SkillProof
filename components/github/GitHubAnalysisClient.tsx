@@ -35,7 +35,7 @@ export default function GitHubAnalysisClient({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
 
-  const runAnalysis = async () => {
+  const runAnalysis = useCallback(async () => {
     setIsAnalyzing(true);
     try {
       const res = await fetch("/api/github/analysis", {
@@ -57,19 +57,18 @@ export default function GitHubAnalysisClient({
     } finally {
       setIsAnalyzing(false);
     }
-  };
+  }, []);
 
   const handleAnalyze = useCallback(async () => {
     await runAnalysis();
-  }, []);
+  }, [runAnalysis]);
 
   // Auto-trigger analysis if connected but no data
   useEffect(() => {
     if (isConnected && !analysisData && !isAnalyzing) {
       handleAnalyze();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isConnected, analysisData, isAnalyzing, handleAnalyze]);
 
   const handleConnect = useCallback(
     async (enteredUsername: string, token?: string) => {
@@ -100,7 +99,7 @@ export default function GitHubAnalysisClient({
         setIsConnecting(false);
       }
     },
-    []
+    [runAnalysis]
   );
 
   const handleDisconnect = useCallback(async () => {
@@ -207,6 +206,7 @@ export default function GitHubAnalysisClient({
         docScore={analysisData.documentation?.score || 0}
         level={analysisData.level}
         recommendations={analysisData.recommendations || []}
+        evidenceSummary={analysisData.evidenceSummary}
       />
 
       {/* Activity & Languages Row */}

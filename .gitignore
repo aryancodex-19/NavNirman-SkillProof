@@ -45,3 +45,8 @@ next-env.d.ts
 
 # kilo agent manager (worktrees)
 /.kilo/
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
