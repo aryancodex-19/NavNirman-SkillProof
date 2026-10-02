@@ -6,7 +6,7 @@ import AetherBackground from "@/components/ui/AetherBackground";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CareerOS — AI-Powered Career Platform",
+  title: "SkillProof - Evidence-Based Skill Verification & Job Matching",
   description:
     "From learning to hiring, all in one place. AI-powered platform that takes students from learning → building → applying → interviewing → getting hired.",
   keywords: [
@@ -34,7 +34,7 @@ export default function RootLayout({
             <div className="relative z-10 flex flex-col min-h-screen">
               {children}
             </div>
-            
+
             <Toaster />
           </ThemeProvider>
         </body>

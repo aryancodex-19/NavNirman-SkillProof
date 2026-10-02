@@ -1,13 +1,17 @@
-import { config as loadEnv } from "dotenv";
-import { defineConfig, env } from "prisma/config";
+import dotenv from "dotenv";
+import { defineConfig } from "prisma/config";
 
-loadEnv({ path: ".env.local" });
+dotenv.config({ path: ".env.local" });
+
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL is not set in .env.local");
+}
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
   datasource: {
-    url: env("DATABASE_URL"),
+    url: databaseUrl,
   },
 });
-
-
