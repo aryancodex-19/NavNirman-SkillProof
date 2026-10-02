@@ -54,7 +54,7 @@ export default function TopicMastery({ progress }: TopicMasteryProps) {
       {/* Mastery Leaderboard */}
       <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-[0_8px_32px_rgba(139,92,246,0.12)]">
         <h3 className="font-bold text-white text-sm mb-5 flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-purple-400" /> 
+          <Trophy className="w-4 h-4 text-purple-400" />
           <span>Topic Mastery Ranking</span>
         </h3>
         <div className="space-y-3.5">

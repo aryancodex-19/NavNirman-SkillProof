@@ -49,7 +49,7 @@ export default function PortfolioPreview({ html, onRegenerate, isLoading }: Port
             <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
           </div>
-          
+
           <div className="bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-[11px] font-mono text-purple-300">
             preview://my-portfolio.html
           </div>
@@ -90,7 +90,7 @@ export default function PortfolioPreview({ html, onRegenerate, isLoading }: Port
               <span>Regenerate</span>
             </button>
           )}
-          
+
           <button
             onClick={openInNewTab}
             className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-white/5 border border-white/10 rounded-xl text-gray-300 hover:text-white hover:border-purple-500/30 transition-all cursor-pointer"
@@ -98,7 +98,7 @@ export default function PortfolioPreview({ html, onRegenerate, isLoading }: Port
             <ExternalLink className="w-3.5 h-3.5 text-purple-400" />
             <span>Open Tab</span>
           </button>
-          
+
           <button
             onClick={downloadHtml}
             className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all hover:scale-[1.02] active:scale-[0.98] shimmer cursor-pointer"
@@ -110,8 +110,8 @@ export default function PortfolioPreview({ html, onRegenerate, isLoading }: Port
       </div>
 
       {/* iframe Preview Container */}
-      <div 
-        className="relative flex justify-center items-center bg-black/50 px-4 transition-all duration-300" 
+      <div
+        className="relative flex justify-center items-center bg-black/50 px-4 transition-all duration-300"
         style={{ minHeight: "750px" }}
       >
         {isLoading ? (
