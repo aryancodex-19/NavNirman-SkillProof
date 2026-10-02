@@ -1,12 +1,16 @@
-# 🚀 CareerOS - AI-Powered Career Platform
+# 🚀 SkillProof - Evidence-Based Skill Verification & Job Matching
 
-> One platform that takes a student from learning → building → applying → interviewing → getting hired.
+> One platform that takes a student from learning → building → proving skills → applying → interviewing → getting hired.
 
 ---
 
 ## 📌 About
 
-CareerOS is an all-in-one AI-powered career platform for students. Unlike other tools that solve just one problem, CareerOS combines **everything** a student needs to get hired.
+SkillProof is an evidence-based skill verification and job matching platform for students and early-career developers.
+
+Instead of relying only on what a résumé claims, SkillProof connects résumé skill claims with publicly accessible GitHub evidence to provide a transparent assessment of how strongly those claims are supported.
+
+The platform combines AI-powered résumé analysis, GitHub evidence analysis, job-description matching, skill-gap detection, interview preparation, and career development into one unified workspace.
 
 ---
 
@@ -40,7 +44,7 @@ CareerOS is an all-in-one AI-powered career platform for students. Unlike other 
 - Role-specific questions
 - Real-time scores: Confidence, Clarity, Technical
 
-### 6. 🎙️ AI Voice Mock Interview (NEW)
+### 6. 🎙️ AI Voice Mock Interview
 - **Real-time voice conversation** with AI interviewer
 - **Speech-to-text** using Web Speech API
 - **Dynamic questions** based on your profile (target role + skills)
@@ -48,7 +52,7 @@ CareerOS is an all-in-one AI-powered career platform for students. Unlike other 
   - Technical Accuracy (0-100)
   - Communication Clarity (0-100)
   - Confidence Level (0-100)
-- **Follow-up questions** based on your previous answers
+- **Follow-up questions** based on previous answers
 - **Text input fallback** if microphone is not available
 - **Final summary report** with:
   - Overall score
@@ -75,15 +79,192 @@ CareerOS is an all-in-one AI-powered career platform for students. Unlike other 
 
 ---
 
+# 🛡️ SkillProof Core — Evidence-Based Skill Verification
+
+SkillProof's core differentiator is its ability to compare **what a candidate claims** with **what their publicly accessible work actually demonstrates**.
+
+Rather than rebuilding the entire platform, SkillProof extends the existing career workspace with a dedicated evidence-based assessment workflow.
+
+### 10. 🔬 Evidence-Based Assessment
+
+The user uploads a résumé, enters a GitHub username, and selects a target role.
+
+SkillProof then:
+
+- Extracts claimed skills from the résumé
+- Analyzes accessible public GitHub repositories
+- Inspects relevant repository evidence
+- Connects evidence back to individual skill claims
+- Generates an evidence-based assessment for each skill
+
+**Priority:** P0 — Essential
+
+---
+
+### 11. 🏷️ Three Evidence-Based Skill Labels
+
+Every assessed skill receives one of three evidence-based verdicts:
+
+#### 🟢 Proven
+Sufficiently strong and relevant evidence supports the specific claim.
+
+#### 🟡 Partial
+Evidence supports only part of the claim or the available evidence is incomplete.
+
+#### ⚪ Claimed-only
+The résumé claims the skill, but the available evidence does not substantiate it.
+
+**Priority:** P0 — Essential
+
+> These labels describe the strength of the available evidence. They do not claim that publicly visible repository activity conclusively proves overall mastery.
+
+---
+
+### 12. 🔗 Clickable Evidence for Every Verdict
+
+SkillProof does not simply display a green badge, red badge, or numerical score.
+
+Every skill result should explain **why** it received its verdict and provide links to relevant evidence such as:
+
+- GitHub repositories
+- Source files
+- Dependency/configuration files
+- Commits
+- Tests
+- Documentation
+- Deployments
+- Pull requests
+- Other relevant public contribution evidence
+
+The user can inspect the evidence behind a verdict instead of blindly trusting an AI-generated score.
+
+**Priority:** P0 — Main Differentiator
+
+---
+
+### 13. 🎯 Job-Readiness Gap Report
+
+SkillProof compares the skills required by a job description with the evidence found for the candidate.
+
+The report identifies:
+
+- ✅ Supported skills
+- ⚠️ Skills with insufficient evidence
+- ❌ Missing requirements
+- 📊 Overall job-readiness match
+- 🧩 Skill gaps
+- 📝 A short actionable micro-task for each gap
+
+Instead of simply telling a candidate what they are missing, SkillProof gives them a practical next step for improving that specific gap.
+
+**Priority:** P0 — Required by the Problem Statement
+
+---
+
+# 🔎 Evidence Trail
+
+SkillProof introduces an **Evidence Trail** for every assessed skill.
+
+For example, if a résumé claims **Python**, the Evidence Trail could show:
+
+### Evidence Found
+A linked repository containing Python source files and tests.
+
+### Evidence Strength
+Partial or strong, based on the actual evidence inspected.
+
+### What It Supports
+Use of Python and the specific implementation observed in the repository.
+
+### What It Does Not Prove
+Independent mastery, professional production experience, or the ability to solve an unfamiliar problem.
+
+SkillProof treats repository activity as **evidence, not conclusive proof of ability**.
+
+A candidate should not be labelled **"Proven in Python"** simply because a repository contains Python files.
+
+The strength of the verdict should depend on the relevance, depth and quality of the available evidence.
+
+If time permits, SkillProof can also provide a short role-specific micro-task to directly test a claimed skill.
+
+---
+
+# ⚙️ SkillProof Workflow
+
+┌─────────────────────┐
+│     Résumé PDF      │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Extract Claimed     │
+│ Skills & Profile    │
+└──────────┬──────────┘
+           │
+           │
+           ▼
+┌─────────────────────┐
+│   GitHub Username    │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ GitHub Evidence      │
+│ Analysis             │
+└──────────┬──────────┘
+           │
+           ▼
+┌────────────────────────────┐
+│ Evidence-Based Assessment  │
+│                            │
+│  Proven / Partial /        │
+│  Claimed-only              │
+└──────────┬─────────────────┘
+           │
+           ▼
+┌────────────────────────────┐
+│      Evidence Trail        │
+│                            │
+│ Repositories / Files /     │
+│ Commits / Tests / PRs      │
+└──────────┬─────────────────┘
+           │
+           │
+           ▼
+┌─────────────────────┐
+│   Target Job / JD   │
+└──────────┬──────────┘
+           │
+           ▼
+┌────────────────────────────┐
+│ Required Skill Extraction  │
+│ & Skill Normalization      │
+└──────────┬─────────────────┘
+           │
+           ▼
+┌────────────────────────────┐
+│ Job-Readiness Gap Report   │
+│                            │
+│ Supported / Insufficient / │
+│ Missing Skills             │
+└──────────┬─────────────────┘
+           │
+           ▼
+┌────────────────────────────┐
+│ Role-Specific Microtasks   │
+│ for Identified Skill Gaps  │
+└────────────────────────────┘
+
 ## 🛠️ Tech Stack
 
 | Category | Technology |
 |----------|------------|
-| **Frontend** | Next.js 14, TypeScript, Tailwind CSS, Shadcn/ui |
+| **Frontend** | Next.js 16, TypeScript, Tailwind CSS, Shadcn/ui |
 | **Backend** | Next.js API Routes, Prisma ORM |
 | **Database** | PostgreSQL (production) / SQLite (development) |
 | **Authentication** | Clerk |
-| **AI** | Groq (Llama 3.3 70B), Gemini 2.5 Flash |
+| **AI** | Groq (`openai/gpt-oss-120b`), Gemini (`gemini-3.8-flash`) |
+| **GitHub Integration** | GitHub API |
 | **Voice** | Web Speech API |
 | **Deployment** | Vercel |
 
@@ -91,32 +272,42 @@ CareerOS is an all-in-one AI-powered career platform for students. Unlike other 
 
 ## 🏗️ AI Architecture
 
-| Module | AI Provider |
-|--------|-------------|
-| Resume Builder (PDF Parse) | Gemini 2.5 Flash |
-| ATS Scanner | Groq Llama 3.3 70B |
-| Career Mentor | Groq Llama 3.3 70B |
-| Internship Finder | Groq Llama 3.3 70B |
-| Interview Coach | Groq Llama 3.3 70B |
-| LinkedIn Optimizer | Groq Llama 3.3 70B |
-| Portfolio Generator | Groq Llama 3.3 70B |
-| **Voice Mock Interview** | **Groq Llama 3.3 70B** |
+| Module | AI / Processing |
+|--------|-----------------|
+| Resume Builder (PDF Parse) | Gemini (`gemini-3.8-flash`) |
+| ATS Scanner | Groq (`openai/gpt-oss-120b`) |
+| Career Mentor | Groq (`openai/gpt-oss-120b`) |
+| Internship Finder | Groq (`openai/gpt-oss-120b`) |
+| Interview Coach | Groq (`openai/gpt-oss-120b`) |
+| LinkedIn Optimizer | Groq (`openai/gpt-oss-120b`) |
+| Portfolio Generator | Groq (`openai/gpt-oss-120b`) |
+| **Voice Mock Interview** | **Groq (`openai/gpt-oss-120b`) + Web Speech API** |
+| **Evidence-Based Skill Assessment** | **Deterministic GitHub Evidence + AI Interpretation** |
+| **Job-Readiness Gap Analysis** | **AI + Evidence-Based Skill Matching** |
 | Coding Tracker | No AI |
+
+> AI is used to interpret, normalize and explain retrieved evidence. Concrete GitHub evidence should come from actual publicly accessible project data wherever possible.
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+
 - PostgreSQL or SQLite
+- Git
+- GitHub API configuration
+- Clerk authentication configuration
+- Groq API key
+- Gemini API key
 
 ### Installation
 
 ```bash
 # Clone repository
-git clone https://github.com/utkarshpan/careeros.git
-cd careeros
+git clone https://github.com/aryancodex-19/NavNirman-SkillProof.git
+cd NavNirman-SkillProof
 
 # Install dependencies
 npm install
@@ -124,8 +315,10 @@ npm install
 # Setup environment variables
 cp .env.example .env.local
 
-# Setup database
+# Generate Prisma Client
 npx prisma generate
+
+# Setup database
 npx prisma db push
 
 # Run development server
