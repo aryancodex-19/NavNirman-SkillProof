@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/prisma";
 
@@ -19,6 +18,7 @@ interface GitHubRepo {
   has_wiki: boolean;
   license: { spdx_id: string } | null;
   topics: string[];
+  default_branch?: string;
   created_at: string;
   updated_at: string;
   pushed_at: string;
@@ -28,21 +28,56 @@ interface GitHubEvent {
   type: string;
   created_at: string;
   repo: { name: string };
+  payload?: any;
+}
+
+export interface DiscoveredEvidence {
+  tests: { name: string; path: string; url: string; framework?: string }[];
+  ciWorkflows: { name: string; path: string; url: string }[];
+  deploymentConfigs: { name: string; path: string; url: string; type: string }[];
+  packageManifests: { name: string; path: string; url: string; ecosystem: string }[];
+  recentCommits: { sha: string; shortSha: string; message: string; date: string; url: string; authorVerified: boolean }[];
+  languages: { name: string; bytes: number; percentage: number }[];
+  readmeUrl: string | null;
+  licenseUrl: string | null;
+  defaultBranch: string;
+}
+
+export interface EnrichedRepo {
+  name: string;
+  fullName: string;
+  description: string | null;
+  url: string;
+  stars: number;
+  forks: number;
+  primaryLanguage: string | null;
+  size: number;
+  sizeCategory: "small" | "medium" | "large";
+  topics: string[];
+  updatedAt: string;
+  pushedAt: string;
+  isFork: boolean;
+  evidence: DiscoveredEvidence;
 }
 
 function buildHeaders(token?: string | null): Record<string, string> {
   const h: Record<string, string> = {
     Accept: "application/vnd.github.v3+json",
-    "User-Agent": "CareerOS-App",
+    "User-Agent": "CareerOS-SkillProof-App",
   };
   if (token) h.Authorization = `Bearer ${token}`;
   return h;
 }
 
 async function fetchGitHub(url: string, headers: Record<string, string>) {
-  const res = await fetch(url, { headers });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error(`Fetch failed for ${url}:`, err);
+    return null;
+  }
 }
 
 // Fetch all pages of repos (up to 300)
@@ -57,7 +92,232 @@ async function fetchAllRepos(username: string, headers: Record<string, string>):
     allRepos.push(...repos);
     if (repos.length < 100) break;
   }
-  return allRepos.filter((r) => !r.fork);
+  return allRepos;
+}
+
+// ─── Deep Tree & Evidence Inspector ───────────────────────
+
+function detectTestFramework(path: string): string | undefined {
+  const lower = path.toLowerCase();
+  if (lower.includes("jest") || lower.endsWith(".test.ts") || lower.endsWith(".test.js") || lower.endsWith(".test.tsx") || lower.endsWith(".test.jsx")) return "Jest / Vitest";
+  if (lower.includes("pytest") || lower.startsWith("test_") || lower.endsWith("_test.py")) return "Pytest";
+  if (lower.endsWith("_test.go")) return "Go Test";
+  if (lower.includes("cypress")) return "Cypress";
+  if (lower.includes("playwright")) return "Playwright";
+  if (lower.includes("mocha") || lower.includes("chai")) return "Mocha";
+  if (lower.endsWith("test.java") || lower.endsWith("tests.java")) return "JUnit";
+  if (lower.endsWith("_spec.rb") || lower.includes("spec/")) return "RSpec";
+  if (lower.includes("/tests/") || lower.includes("/__tests__/") || lower.includes("/test/")) return "Test Suite";
+  return undefined;
+}
+
+function detectDeploymentType(path: string): string {
+  const lower = path.toLowerCase();
+  if (lower.includes("dockerfile")) return "Docker Container";
+  if (lower.includes("docker-compose")) return "Docker Compose";
+  if (lower.includes("vercel.json")) return "Vercel Deployment";
+  if (lower.includes("netlify.toml")) return "Netlify";
+  if (lower.includes("fly.toml")) return "Fly.io";
+  if (lower.includes("procfile")) return "Heroku / Dokku";
+  if (lower.endsWith(".k8s.yaml") || lower.endsWith(".k8s.yml") || lower.includes("kubernetes/") || lower.includes("helm/")) return "Kubernetes / Helm";
+  if (lower.includes("terraform") || lower.endsWith(".tf")) return "Terraform IaC";
+  return "Deployment Config";
+}
+
+function detectPackageEcosystem(path: string): string {
+  const filename = path.split("/").pop() || path;
+  if (filename === "package.json") return "Node.js / npm";
+  if (filename === "requirements.txt" || filename === "pyproject.toml" || filename === "Pipfile") return "Python";
+  if (filename === "Cargo.toml") return "Rust / Cargo";
+  if (filename === "go.mod") return "Go Modules";
+  if (filename === "pom.xml" || filename === "build.gradle" || filename === "build.gradle.kts") return "Java / Kotlin";
+  if (filename === "Gemfile") return "Ruby / Bundler";
+  if (filename === "composer.json") return "PHP / Composer";
+  return "Package Manifest";
+}
+
+async function inspectRepositoryEvidence(
+  repo: GitHubRepo,
+  username: string,
+  headers: Record<string, string>
+): Promise<DiscoveredEvidence> {
+  const defaultBranch = repo.default_branch || "main";
+  const repoBaseUrl = repo.html_url;
+
+  // 1. Fetch language breakdown
+  const langDataPromise = fetchGitHub(
+    `https://api.github.com/repos/${repo.full_name}/languages`,
+    headers
+  );
+
+  // 2. Fetch Git Tree (recursive, up to 1 level deep or truncated)
+  const treeDataPromise = fetchGitHub(
+    `https://api.github.com/repos/${repo.full_name}/git/trees/${defaultBranch}?recursive=1`,
+    headers
+  );
+
+  // 3. Fetch recent commits by user
+  const commitsDataPromise = fetchGitHub(
+    `https://api.github.com/repos/${repo.full_name}/commits?per_page=5&author=${username}`,
+    headers
+  );
+
+  const [langData, treeData, commitsData] = await Promise.all([
+    langDataPromise,
+    treeDataPromise,
+    commitsDataPromise,
+  ]);
+
+  // Parse languages
+  const languages: { name: string; bytes: number; percentage: number }[] = [];
+  if (langData && typeof langData === "object") {
+    const totalBytes = Object.values(langData as Record<string, number>).reduce((a, b) => a + b, 0);
+    Object.entries(langData as Record<string, number>).forEach(([name, bytes]) => {
+      languages.push({
+        name,
+        bytes,
+        percentage: totalBytes > 0 ? Math.round((bytes / totalBytes) * 1000) / 10 : 0,
+      });
+    });
+    languages.sort((a, b) => b.bytes - a.bytes);
+  }
+
+  // Parse Git Tree entries
+  const tests: DiscoveredEvidence["tests"] = [];
+  const ciWorkflows: DiscoveredEvidence["ciWorkflows"] = [];
+  const deploymentConfigs: DiscoveredEvidence["deploymentConfigs"] = [];
+  const packageManifests: DiscoveredEvidence["packageManifests"] = [];
+
+  const treeEntries: { path: string; type: string }[] = Array.isArray(treeData?.tree)
+    ? treeData.tree
+    : [];
+
+  // Limit traversal to prevent performance bottlenecks on massive monorepos
+  const entriesToScan = treeEntries.slice(0, 1500);
+
+  for (const entry of entriesToScan) {
+    const path = entry.path;
+    const lower = path.toLowerCase();
+    const isBlob = entry.type === "blob";
+    const filename = path.split("/").pop() || path;
+    const fileUrl = `${repoBaseUrl}/blob/${defaultBranch}/${path}`;
+
+    // CI Workflows
+    if (path.startsWith(".github/workflows/") && (path.endsWith(".yml") || path.endsWith(".yaml"))) {
+      ciWorkflows.push({
+        name: filename,
+        path,
+        url: fileUrl,
+      });
+    }
+
+    // Deployment configs
+    const isDeployFile =
+      filename === "Dockerfile" ||
+      filename === "docker-compose.yml" ||
+      filename === "docker-compose.yaml" ||
+      filename === "vercel.json" ||
+      filename === "netlify.toml" ||
+      filename === "fly.toml" ||
+      filename === "Procfile" ||
+      lower.endsWith(".k8s.yaml") ||
+      lower.endsWith(".k8s.yml") ||
+      (lower.endsWith(".tf") && !lower.includes(".terraform/"));
+
+    if (isBlob && isDeployFile) {
+      deploymentConfigs.push({
+        name: filename,
+        path,
+        url: fileUrl,
+        type: detectDeploymentType(path),
+      });
+    }
+
+    // Package Manifests
+    const isManifest =
+      filename === "package.json" ||
+      filename === "Cargo.toml" ||
+      filename === "go.mod" ||
+      filename === "requirements.txt" ||
+      filename === "pyproject.toml" ||
+      filename === "pom.xml" ||
+      filename === "build.gradle" ||
+      filename === "Gemfile";
+
+    if (isBlob && isManifest && !path.includes("node_modules/") && !path.includes("vendor/")) {
+      packageManifests.push({
+        name: filename,
+        path,
+        url: fileUrl,
+        ecosystem: detectPackageEcosystem(path),
+      });
+    }
+
+    // Test files
+    const isTestFile =
+      lower.endsWith(".test.ts") ||
+      lower.endsWith(".test.tsx") ||
+      lower.endsWith(".test.js") ||
+      lower.endsWith(".test.jsx") ||
+      lower.endsWith(".spec.ts") ||
+      lower.endsWith(".spec.js") ||
+      lower.endsWith("_test.go") ||
+      lower.endsWith("_test.py") ||
+      lower.startsWith("test_") ||
+      lower.includes("/__tests__/") ||
+      lower.includes("/tests/") ||
+      lower.includes("/cypress/") ||
+      filename === "jest.config.js" ||
+      filename === "jest.config.ts" ||
+      filename === "vitest.config.ts" ||
+      filename === "pytest.ini";
+
+    if (isBlob && isTestFile && !path.includes("node_modules/")) {
+      if (tests.length < 15) {
+        tests.push({
+          name: filename,
+          path,
+          url: fileUrl,
+          framework: detectTestFramework(path),
+        });
+      }
+    }
+  }
+
+  // Parse commits
+  const recentCommits: DiscoveredEvidence["recentCommits"] = [];
+  if (Array.isArray(commitsData)) {
+    for (const c of commitsData.slice(0, 5)) {
+      const sha = c.sha || "";
+      const shortSha = sha.substring(0, 7);
+      const message = c.commit?.message?.split("\n")[0] || "Update";
+      const date = c.commit?.author?.date || c.commit?.committer?.date || "";
+      const commitUrl = c.html_url || `${repoBaseUrl}/commit/${sha}`;
+      const authorLogin = c.author?.login?.toLowerCase();
+      const authorVerified = authorLogin === username.toLowerCase();
+
+      recentCommits.push({
+        sha,
+        shortSha,
+        message,
+        date,
+        url: commitUrl,
+        authorVerified,
+      });
+    }
+  }
+
+  return {
+    tests,
+    ciWorkflows,
+    deploymentConfigs,
+    packageManifests,
+    recentCommits,
+    languages,
+    readmeUrl: `${repoBaseUrl}#readme`,
+    licenseUrl: repo.license ? `${repoBaseUrl}/blob/${defaultBranch}/LICENSE` : null,
+    defaultBranch,
+  };
 }
 
 // ─── Scoring Functions ─────────────────────────────────────
@@ -158,22 +418,35 @@ function analyzeActivity(events: GitHubEvent[], repos: GitHubRepo[]) {
   };
 }
 
-function analyzeLanguages(repos: GitHubRepo[]) {
+function analyzeLanguages(repos: GitHubRepo[], enrichedRepos: EnrichedRepo[]) {
   const langMap: Record<string, number> = {};
-  let totalSize = 0;
+  let totalBytes = 0;
 
-  repos.forEach((r) => {
-    if (r.language) {
-      langMap[r.language] = (langMap[r.language] || 0) + r.size;
-      totalSize += r.size;
+  // Prefer deeply extracted language bytes from inspected repositories
+  enrichedRepos.forEach((er) => {
+    if (er.evidence?.languages && er.evidence.languages.length > 0) {
+      er.evidence.languages.forEach((l) => {
+        langMap[l.name] = (langMap[l.name] || 0) + l.bytes;
+        totalBytes += l.bytes;
+      });
     }
   });
+
+  // Fallback for repos not deeply inspected
+  if (totalBytes === 0) {
+    repos.forEach((r) => {
+      if (r.language) {
+        langMap[r.language] = (langMap[r.language] || 0) + r.size * 1024;
+        totalBytes += r.size * 1024;
+      }
+    });
+  }
 
   const languages = Object.entries(langMap)
     .map(([name, bytes]) => ({
       name,
       bytes,
-      percentage: totalSize > 0 ? Math.round((bytes / totalSize) * 1000) / 10 : 0,
+      percentage: totalBytes > 0 ? Math.round((bytes / totalBytes) * 1000) / 10 : 0,
     }))
     .sort((a, b) => b.bytes - a.bytes);
 
@@ -181,9 +454,9 @@ function analyzeLanguages(repos: GitHubRepo[]) {
   const techCategories: Record<string, string[]> = {
     Frontend: ["JavaScript", "TypeScript", "HTML", "CSS", "SCSS", "Vue", "Svelte"],
     Backend: ["Python", "Java", "Go", "Ruby", "PHP", "C#", "Rust", "Kotlin"],
-    "Mobile": ["Swift", "Kotlin", "Dart", "Objective-C"],
-    "Systems": ["C", "C++", "Rust", "Assembly"],
-    "Data Science": ["Jupyter Notebook", "R", "MATLAB"],
+    Mobile: ["Swift", "Kotlin", "Dart", "Objective-C"],
+    Systems: ["C", "C++", "Rust", "Assembly"],
+    "Data Science": ["Jupyter Notebook", "R", "MATLAB", "Python"],
     DevOps: ["Shell", "Dockerfile", "HCL", "Nix"],
   };
 
@@ -193,7 +466,7 @@ function analyzeLanguages(repos: GitHubRepo[]) {
   Object.entries(techCategories).forEach(([category, langs]) => {
     const matched = langs.filter((l) => langNames.includes(l));
     if (matched.length > 0) {
-      techStack.push({ category, languages: matched });
+      techStack.push({ category, languages: Array.from(new Set(matched)) });
     }
   });
 
@@ -214,60 +487,62 @@ function analyzeLanguages(repos: GitHubRepo[]) {
   };
 }
 
-function analyzeProjects(repos: GitHubRepo[], profile: any) {
-  const totalStars = repos.reduce((sum, r) => sum + r.stargazers_count, 0);
-  const totalForks = repos.reduce((sum, r) => sum + r.forks_count, 0);
-  const totalWatchers = repos.reduce((sum, r) => sum + r.watchers_count, 0);
+function analyzeProjects(repos: GitHubRepo[], profile: any, enrichedRepos: EnrichedRepo[]) {
+  const nonForkRepos = repos.filter((r) => !r.fork);
+  const totalStars = nonForkRepos.reduce((sum, r) => sum + r.stargazers_count, 0);
+  const totalForks = nonForkRepos.reduce((sum, r) => sum + r.forks_count, 0);
+  const totalWatchers = nonForkRepos.reduce((sum, r) => sum + r.watchers_count, 0);
 
-  // Top repos by stars
-  const topRepos = [...repos]
-    .sort((a, b) => b.stargazers_count - a.stargazers_count)
-    .slice(0, 8)
-    .map((r) => ({
-      name: r.name,
-      description: r.description,
-      url: r.html_url,
-      stars: r.stargazers_count,
-      forks: r.forks_count,
-      language: r.language,
-      size: r.size,
-      sizeCategory: r.size < 500 ? "small" : r.size < 5000 ? "medium" : "large",
-      topics: r.topics || [],
-      updatedAt: r.updated_at,
-    }));
+  // Top repos by stars / recent activity
+  const topRepos = enrichedRepos.map((r) => ({
+    name: r.name,
+    fullName: r.fullName,
+    description: r.description,
+    url: r.url,
+    stars: r.stars,
+    forks: r.forks,
+    language: r.primaryLanguage,
+    size: r.size,
+    sizeCategory: r.sizeCategory,
+    topics: r.topics || [],
+    updatedAt: r.updatedAt,
+    evidence: r.evidence,
+  }));
 
   // Project size distribution
   const sizeDistribution = {
-    small: repos.filter((r) => r.size < 500).length,
-    medium: repos.filter((r) => r.size >= 500 && r.size < 5000).length,
-    large: repos.filter((r) => r.size >= 5000).length,
+    small: nonForkRepos.filter((r) => r.size < 500).length,
+    medium: nonForkRepos.filter((r) => r.size >= 500 && r.size < 5000).length,
+    large: nonForkRepos.filter((r) => r.size >= 5000).length,
   };
 
   // Topics analysis
   const topicsSet = new Set<string>();
-  repos.forEach((r) => (r.topics || []).forEach((t) => topicsSet.add(t)));
+  nonForkRepos.forEach((r) => (r.topics || []).forEach((t) => topicsSet.add(t)));
 
-  // Code quality heuristics
-  const reposWithDescription = repos.filter((r) => r.description && r.description.length > 10).length;
-  const reposWithTopics = repos.filter((r) => r.topics && r.topics.length > 0).length;
-  const reposWithLicense = repos.filter((r) => r.license).length;
+  // Quality heuristics with evidence checks
+  const reposWithDescription = nonForkRepos.filter((r) => r.description && r.description.length > 10).length;
+  const reposWithTopics = nonForkRepos.filter((r) => r.topics && r.topics.length > 0).length;
+  const reposWithLicense = nonForkRepos.filter((r) => r.license).length;
+  const reposWithTests = enrichedRepos.filter((r) => r.evidence?.tests?.length > 0).length;
+  const reposWithCI = enrichedRepos.filter((r) => r.evidence?.ciWorkflows?.length > 0).length;
 
-  const qualityRatio = repos.length > 0
-    ? (reposWithDescription + reposWithTopics + reposWithLicense) / (repos.length * 3)
+  const qualityRatio = nonForkRepos.length > 0
+    ? (reposWithDescription + reposWithTopics + reposWithLicense + reposWithTests * 2 + reposWithCI * 2) / (nonForkRepos.length * 7)
     : 0;
 
   // Project score
   let score = 0;
-  score += Math.min(20, repos.length * 2); // Repo count (max 20)
-  score += Math.min(25, totalStars * 2); // Stars (max 25)
+  score += Math.min(20, nonForkRepos.length * 2); // Repo count (max 20)
+  score += Math.min(20, totalStars * 2); // Stars (max 20)
   score += Math.min(15, totalForks * 3); // Forks (max 15)
   score += Math.min(20, sizeDistribution.large * 10 + sizeDistribution.medium * 5); // Project size (max 20)
-  score += Math.min(20, Math.round(qualityRatio * 20)); // Quality (max 20)
+  score += Math.min(25, Math.round(qualityRatio * 25)); // Verified quality with tests/CI (max 25)
   score = Math.min(100, score);
 
   return {
     score,
-    totalRepos: repos.length,
+    totalRepos: nonForkRepos.length,
     totalStars,
     totalForks,
     totalWatchers,
@@ -281,8 +556,8 @@ function analyzeProjects(repos: GitHubRepo[], profile: any) {
 }
 
 async function analyzeDocumentation(repos: GitHubRepo[], headers: Record<string, string>) {
-  // Check README, LICENSE, etc. for top repos (limit to 15 to avoid rate limits)
-  const reposToCheck = repos.slice(0, 15);
+  const nonForkRepos = repos.filter((r) => !r.fork);
+  const reposToCheck = nonForkRepos.slice(0, 10);
   const results: {
     name: string;
     hasReadme: boolean;
@@ -290,6 +565,8 @@ async function analyzeDocumentation(repos: GitHubRepo[], headers: Record<string,
     hasDescription: boolean;
     readmeLength: number;
     hasSetupInstructions: boolean;
+    readmeUrl?: string;
+    licenseUrl?: string | null;
     docScore: number;
   }[] = [];
 
@@ -297,6 +574,7 @@ async function analyzeDocumentation(repos: GitHubRepo[], headers: Record<string,
     let hasReadme = false;
     let readmeLength = 0;
     let hasSetupInstructions = false;
+    const defaultBranch = repo.default_branch || "main";
 
     // Check README
     const readmeData = await fetchGitHub(
@@ -306,11 +584,9 @@ async function analyzeDocumentation(repos: GitHubRepo[], headers: Record<string,
 
     if (readmeData) {
       hasReadme = true;
-      // Content is base64 encoded
       if (readmeData.size) {
         readmeLength = readmeData.size;
       }
-      // Decode and check for setup instructions
       if (readmeData.content) {
         try {
           const content = atob(readmeData.content.replace(/\n/g, ""));
@@ -322,7 +598,8 @@ async function analyzeDocumentation(repos: GitHubRepo[], headers: Record<string,
             lowerContent.includes("usage") ||
             lowerContent.includes("how to run") ||
             lowerContent.includes("npm") ||
-            lowerContent.includes("pip install");
+            lowerContent.includes("pip install") ||
+            lowerContent.includes("cargo run");
         } catch { /* ignore decode errors */ }
       }
     }
@@ -330,7 +607,6 @@ async function analyzeDocumentation(repos: GitHubRepo[], headers: Record<string,
     const hasLicense = !!repo.license;
     const hasDescription = !!repo.description && repo.description.length > 10;
 
-    // Per-repo doc score
     let docScore = 0;
     if (hasReadme) docScore += 30;
     if (readmeLength > 500) docScore += 15;
@@ -347,6 +623,8 @@ async function analyzeDocumentation(repos: GitHubRepo[], headers: Record<string,
       hasDescription,
       readmeLength,
       hasSetupInstructions,
+      readmeUrl: `${repo.html_url}#readme`,
+      licenseUrl: hasLicense ? `${repo.html_url}/blob/${defaultBranch}/LICENSE` : null,
       docScore,
     });
   }
@@ -362,7 +640,6 @@ async function analyzeDocumentation(repos: GitHubRepo[], headers: Record<string,
   const descriptionPercentage = totalChecked > 0 ? Math.round((descriptionCount / totalChecked) * 100) : 0;
   const setupPercentage = totalChecked > 0 ? Math.round((setupCount / totalChecked) * 100) : 0;
 
-  // Overall documentation score
   const avgDocScore = totalChecked > 0
     ? Math.round(results.reduce((sum, r) => sum + r.docScore, 0) / totalChecked)
     : 0;
@@ -392,21 +669,27 @@ function generateRecommendations(
     recommendations.push({
       category: "Activity",
       priority: "high",
-      message: "Increase your commit frequency. Aim for at least 3-4 commits per week to show consistent coding activity.",
+      message: "Increase commit cadence. Aim for consistent weekly commits to show active development momentum.",
     });
   }
-  if (analysis.activity?.consistencyScore < 30) {
+
+  // Testing & Quality recommendations
+  const reposWithTests = analysis.projects?.topRepos?.filter((r: any) => r.evidence?.tests?.length > 0).length || 0;
+  if (reposWithTests === 0) {
     recommendations.push({
-      category: "Activity",
+      category: "Testing",
       priority: "high",
-      message: "Work on coding consistency. Try to contribute code at least a few days each week rather than in sporadic bursts.",
+      message: "Add automated test suites (e.g. Jest, Pytest, Go test) to your key repositories to prove verifiable code correctness.",
     });
   }
-  if (analysis.activity?.trend === "down") {
+
+  // CI/CD recommendations
+  const reposWithCI = analysis.projects?.topRepos?.filter((r: any) => r.evidence?.ciWorkflows?.length > 0).length || 0;
+  if (reposWithCI === 0) {
     recommendations.push({
-      category: "Activity",
+      category: "DevOps & CI/CD",
       priority: "medium",
-      message: "Your activity has been declining recently. Consider setting daily coding goals to maintain momentum.",
+      message: "Configure GitHub Actions workflows (.github/workflows) to demonstrate automated builds and CI best practices.",
     });
   }
 
@@ -415,60 +698,16 @@ function generateRecommendations(
     recommendations.push({
       category: "Languages",
       priority: "medium",
-      message: "Diversify your tech stack. Explore new programming languages or frameworks to demonstrate versatility.",
-    });
-  }
-  if (analysis.languages?.totalLanguages < 3) {
-    recommendations.push({
-      category: "Languages",
-      priority: "medium",
-      message: "Branch out from your primary language. Build projects in at least 2-3 different languages.",
-    });
-  }
-
-  // Project recommendations
-  if (projectScore < 40) {
-    recommendations.push({
-      category: "Projects",
-      priority: "high",
-      message: "Build more substantial projects. Aim for medium-to-large repos that showcase your problem-solving abilities.",
-    });
-  }
-  if (analysis.projects?.totalStars < 5) {
-    recommendations.push({
-      category: "Projects",
-      priority: "low",
-      message: "Share your projects on social media and developer communities to gain stars and visibility.",
-    });
-  }
-  if (analysis.projects?.qualityScore < 50) {
-    recommendations.push({
-      category: "Projects",
-      priority: "medium",
-      message: "Add descriptions and topics to your repositories. Well-documented repos attract more attention.",
+      message: "Diversify tech stack depth. Explore full-stack frameworks and systems languages to expand technical versatility.",
     });
   }
 
   // Documentation recommendations
-  if (docScore < 40) {
+  if (docScore < 50) {
     recommendations.push({
       category: "Documentation",
       priority: "high",
-      message: "Add comprehensive README files to all your repositories. Include project description, setup instructions, and usage examples.",
-    });
-  }
-  if (analysis.documentation?.licensePercentage < 50) {
-    recommendations.push({
-      category: "Documentation",
-      priority: "low",
-      message: "Add open-source licenses (like MIT or Apache 2.0) to your projects to encourage collaboration.",
-    });
-  }
-  if (analysis.documentation?.setupPercentage < 50) {
-    recommendations.push({
-      category: "Documentation",
-      priority: "medium",
-      message: "Include setup/installation instructions in your READMEs. This shows professionalism and helps other developers.",
+      message: "Enhance README files with clear architecture diagrams, installation steps, and code examples.",
     });
   }
 
@@ -487,7 +726,7 @@ function getScoreLevel(score: number): { label: string; color: string } {
 
 // ─── Route Handler ─────────────────────────────────────────
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const { userId: clerkId } = await auth();
     if (!clerkId) {
@@ -521,26 +760,60 @@ export async function POST(request: NextRequest) {
     );
 
     if (!profile) {
-      return Response.json({ error: "Failed to fetch GitHub profile" }, { status: 502 });
+      return Response.json({ error: "Failed to fetch GitHub profile. Rate limit may be exceeded." }, { status: 502 });
     }
 
-    // 2. Fetch repos
-    const repos = await fetchAllRepos(githubUsername, headers);
+    // 2. Fetch all public repos
+    const allRepos = await fetchAllRepos(githubUsername, headers);
+    const nonForkRepos = allRepos.filter((r) => !r.fork);
 
-    // 3. Fetch events
+    // Sort by stars and recent updates to pick top candidates for deep inspection
+    const reposForDeepScan = [...nonForkRepos]
+      .sort((a, b) => (b.stargazers_count * 10 + new Date(b.pushed_at).getTime()) - (a.stargazers_count * 10 + new Date(a.pushed_at).getTime()))
+      .slice(0, 8);
+
+    // 3. Concurrently inspect trees, languages, and commits for top repos
+    const scanResults = await Promise.allSettled(
+      reposForDeepScan.map(async (repo) => {
+        const evidence = await inspectRepositoryEvidence(repo, githubUsername, headers);
+        const enriched: EnrichedRepo = {
+          name: repo.name,
+          fullName: repo.full_name,
+          description: repo.description,
+          url: repo.html_url,
+          stars: repo.stargazers_count,
+          forks: repo.forks_count,
+          primaryLanguage: repo.language,
+          size: repo.size,
+          sizeCategory: repo.size < 500 ? "small" : repo.size < 5000 ? "medium" : "large",
+          topics: repo.topics || [],
+          updatedAt: repo.updated_at,
+          pushedAt: repo.pushed_at,
+          isFork: repo.fork,
+          evidence,
+        };
+        return enriched;
+      })
+    );
+
+    const enrichedRepos: EnrichedRepo[] = scanResults
+      .filter((r): r is PromiseFulfilledResult<EnrichedRepo> => r.status === "fulfilled")
+      .map((r) => r.value);
+
+    // 4. Fetch events
     const events: GitHubEvent[] =
       (await fetchGitHub(
         `https://api.github.com/users/${githubUsername}/events/public?per_page=100`,
         headers
       )) || [];
 
-    // 4. Run analyses
-    const activity = analyzeActivity(events, repos);
-    const languages = analyzeLanguages(repos);
-    const projects = analyzeProjects(repos, profile);
-    const documentation = await analyzeDocumentation(repos, headers);
+    // 5. Run analyses
+    const activity = analyzeActivity(events, nonForkRepos);
+    const languages = analyzeLanguages(nonForkRepos, enrichedRepos);
+    const projects = analyzeProjects(nonForkRepos, profile, enrichedRepos);
+    const documentation = await analyzeDocumentation(nonForkRepos, headers);
 
-    // 5. Compute overall score
+    // 6. Compute overall score
     const overallScore = Math.round(
       activity.score * 0.3 +
       languages.score * 0.2 +
@@ -555,7 +828,7 @@ export async function POST(request: NextRequest) {
       documentation,
     };
 
-    // 6. Generate recommendations
+    // 7. Generate recommendations
     const recommendations = generateRecommendations(
       activity.score,
       languages.score,
@@ -582,9 +855,16 @@ export async function POST(request: NextRequest) {
         following: profile.following,
         createdAt: profile.created_at,
       },
+      evidenceSummary: {
+        totalInspectedRepos: enrichedRepos.length,
+        totalTestSuites: enrichedRepos.reduce((acc, r) => acc + (r.evidence?.tests?.length || 0), 0),
+        totalCIWorkflows: enrichedRepos.reduce((acc, r) => acc + (r.evidence?.ciWorkflows?.length || 0), 0),
+        totalDeploymentConfigs: enrichedRepos.reduce((acc, r) => acc + (r.evidence?.deploymentConfigs?.length || 0), 0),
+        totalVerifiedCommits: enrichedRepos.reduce((acc, r) => acc + (r.evidence?.recentCommits?.length || 0), 0),
+      },
     };
 
-    // 7. Save to DB
+    // 8. Save to DB
     await db.gitHubAnalysis.update({
       where: { userId: user.id },
       data: {

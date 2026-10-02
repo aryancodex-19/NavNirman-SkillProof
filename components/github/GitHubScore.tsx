@@ -26,6 +26,17 @@ interface GitHubScoreProps {
     priority: "high" | "medium" | "low";
     message: string;
   }[];
+  evidenceSummary?: {
+    analyzedReposCount: number;
+    totalReposCount: number;
+    reposWithTests: number;
+    reposWithCI: number;
+    reposWithDeployConfig: number;
+    totalVerifiedCommits: number;
+    testFrameworksFound: string[];
+    ciToolsFound: string[];
+    deployTargetsFound: string[];
+  };
 }
 
 const CATEGORY_META = {
@@ -150,6 +161,7 @@ export default function GitHubScore({
   docScore,
   level,
   recommendations,
+  evidenceSummary,
 }: GitHubScoreProps) {
   const scores = [
     { key: "Activity" as const, score: activityScore },
@@ -241,6 +253,65 @@ export default function GitHubScore({
             })}
           </div>
         </div>
+
+        {/* Evidence Highlights Bar */}
+        {evidenceSummary && (
+          <div className="mt-6 pt-5 border-t border-white/5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+              <div className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">
+                Verified Commits
+              </div>
+              <div className="text-lg font-bold text-white mt-0.5">
+                {evidenceSummary.totalVerifiedCommits}
+              </div>
+              <div className="text-[10px] text-gray-500">
+                Author-matched records
+              </div>
+            </div>
+
+            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+              <div className="text-[10px] text-emerald-400/80 uppercase tracking-wider font-semibold">
+                Test Suites
+              </div>
+              <div className="text-lg font-bold text-emerald-400 mt-0.5">
+                {evidenceSummary.reposWithTests} / {evidenceSummary.analyzedReposCount}
+              </div>
+              <div className="text-[10px] text-gray-500 truncate">
+                {evidenceSummary.testFrameworksFound?.length
+                  ? evidenceSummary.testFrameworksFound.join(", ")
+                  : "No test files detected"}
+              </div>
+            </div>
+
+            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+              <div className="text-[10px] text-blue-400/80 uppercase tracking-wider font-semibold">
+                CI Workflows
+              </div>
+              <div className="text-lg font-bold text-blue-400 mt-0.5">
+                {evidenceSummary.reposWithCI} / {evidenceSummary.analyzedReposCount}
+              </div>
+              <div className="text-[10px] text-gray-500 truncate">
+                {evidenceSummary.ciToolsFound?.length
+                  ? evidenceSummary.ciToolsFound.join(", ")
+                  : "No CI workflows"}
+              </div>
+            </div>
+
+            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+              <div className="text-[10px] text-purple-400/80 uppercase tracking-wider font-semibold">
+                Deployment Configs
+              </div>
+              <div className="text-lg font-bold text-purple-400 mt-0.5">
+                {evidenceSummary.reposWithDeployConfig} / {evidenceSummary.analyzedReposCount}
+              </div>
+              <div className="text-[10px] text-gray-500 truncate">
+                {evidenceSummary.deployTargetsFound?.length
+                  ? evidenceSummary.deployTargetsFound.join(", ")
+                  : "No deploy configs"}
+              </div>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Recommendations */}
