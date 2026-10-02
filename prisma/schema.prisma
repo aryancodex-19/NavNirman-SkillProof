@@ -1,0 +1,172 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                String             @id @default(cuid())
+  clerkId           String             @unique
+  email             String
+  name              String
+  targetRole        String?
+  skills            String?            // JSON stringified array of strings
+  githubUrl         String?
+  linkedinUrl       String?
+  bio               String?
+  profileImage      String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  resumes           Resume[]
+  interviewSessions InterviewSession[]
+  codingProgress    CodingProgress[]
+  savedJobs         SavedJob[]
+  portfolios        Portfolio[]
+  atsScans          ATSScan[]
+  mentorChats       MentorChat[]
+  voiceInterviews   VoiceInterview[]
+  githubAnalyses    GitHubAnalysis[]
+}
+
+model Resume {
+  id          String          @id @default(cuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String          @default("Untitled Resume")
+  fullName    String?
+  email       String?
+  phone       String?
+  summary     String?
+  skills      String?         // JSON stringified array of strings
+  experience  String?         // JSON array of {company, role, duration, bullets: string[]}
+  education   String?         // JSON array of {school, degree, year, gpa}
+  atsScore    Int?
+  targetRole  String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  versions    ResumeVersion[]
+}
+
+model ResumeVersion {
+  id         String   @id @default(cuid())
+  resumeId   String
+  resume     Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  version    Int
+  title      String   @default("Untitled Version")
+  fullName   String?
+  email      String?
+  phone      String?
+  summary    String?
+  skills     String?  // JSON stringified array of strings
+  experience String?  // JSON array of Experience objects
+  education  String?  // JSON array of Education objects
+  atsScore   Int?
+  targetRole String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ATSScan {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobDescription String
+  resumeText     String
+  score          Int
+  matchedSkills  String   // JSON stringified array
+  missingSkills  String   // JSON stringified array
+  feedback       String   // JSON stringified array
+  formatting     String   // JSON stringified array
+  scannedAt      DateTime @default(now())
+}
+
+model InterviewSession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String?
+  questions String   // JSON array of question strings
+  answers   String   // JSON array of answer strings
+  scores    String   // JSON array of score objects {score, feedback, confidence, clarity}
+  createdAt DateTime @default(now())
+}
+
+model CodingProgress {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic          String
+  problemsSolved Int      @default(0)
+  streak         Int      @default(0)
+  lastActive     DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, topic])
+}
+
+model SavedJob {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId      String
+  jobTitle   String
+  company    String
+  location   String
+  url        String   @default("")
+  matchScore Int      @default(0)
+  savedAt    DateTime @default(now())
+
+  @@unique([userId, jobId])
+}
+
+model Portfolio {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template    String    @default("modern")
+  htmlContent String?   // Generated HTML
+  deployedUrl String?
+  deployedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model MentorChat {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  sender    String   // "user" or "mentor"
+  createdAt DateTime @default(now())
+}
+
+model VoiceInterview {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetRole   String
+  skills       String   @default("[]")       // JSON stringified array
+  questions    String   @default("[]")       // JSON array of {text, type, difficulty}
+  answers      String   @default("[]")       // JSON array of answer strings
+  evaluations  String   @default("[]")       // JSON array of evaluation objects
+  overallScore Int      @default(0)
+  finalReport  String?                       // JSON object with summary
+  durationSecs Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
+model GitHubAnalysis {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  githubUsername String
+  githubToken    String?  
+  analysisData   Json?    
+  overallScore   Int?     
+  analyzedAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
