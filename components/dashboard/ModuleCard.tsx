@@ -17,6 +17,7 @@ import {
   Mic,
   HelpCircle,
   GitGraph,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -32,6 +33,7 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
   Layout,
   Mic,
   GitGraph,
+  ShieldCheck,
 };
 
 interface ModuleCardProps {

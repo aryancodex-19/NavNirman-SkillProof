@@ -16,6 +16,13 @@ const ModuleCard = dynamic(() => import("@/components/dashboard/ModuleCard"), {
 
 const MODULES = [
   {
+    title: "Evidence-Based Skill Assessment",
+    description: "Evaluate resume claims backed by verifiable public GitHub code artifacts against target job roles.",
+    status: "active" as const,
+    iconName: "ShieldCheck",
+    href: "/dashboard/assessment",
+  },
+  {
     title: "AI Resume Builder",
     description: "Build ATS-optimized resumes with AI-powered suggestions and real-time formatting.",
     status: "active" as const,
@@ -135,6 +142,11 @@ export default async function DashboardPage() {
 
   // Get module badge based on real data
   const getModuleBadge = (title: string) => {
+    if (title === "Evidence-Based Skill Assessment") {
+      const assessmentData = gitHubAnalysisRecord?.analysisData as any;
+      const coverage = assessmentData?.latestAssessment?.metrics?.evidenceCoveragePercentage;
+      return coverage !== undefined && coverage !== null ? `${coverage}% Evidenced` : "Run Audit";
+    }
     if (title === "AI Resume Builder") return resumesCount > 0 ? `${resumesCount} Resumes` : "Get Started";
     if (title === "ATS Scanner") return avgAtsScore !== "—" ? `Avg: ${avgAtsScore}` : "Start Scanning";
     if (title === "AI Career Mentor") return mentorChatsCount > 0 ? `${mentorChatsCount} Chats` : "Start Chatting";

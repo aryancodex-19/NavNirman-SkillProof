@@ -24,6 +24,7 @@ import {
   Share2,
   Layout,
   GitGraph,
+  ShieldCheck,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -32,6 +33,7 @@ const NAV_GROUPS = [
     name: "Workspace",
     items: [
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { label: "Skill Assessment", href: "/dashboard/assessment", icon: ShieldCheck },
       { label: "AI Resume Builder", href: "/dashboard/resume", icon: FileText },
       { label: "ATS Scanner", href: "/dashboard/ats", icon: ScanSearch },
       { label: "Portfolio Generator", href: "/dashboard/portfolio", icon: Layout },
