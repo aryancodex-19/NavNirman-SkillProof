@@ -19,6 +19,7 @@ import {
   Layout,
   GitGraph,
   ShieldCheck,
+  TrendingUp,
   Sparkles,
   PanelLeftClose,
   PanelLeftOpen,
@@ -44,6 +45,7 @@ const NAV_GROUPS: { name: string; items: { label: string; href: string; icon: Lu
     items: [
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { label: "Skill Assessment", href: "/dashboard/assessment", icon: ShieldCheck },
+      { label: "Gap Report", href: "/dashboard/gap-report", icon: TrendingUp },
       { label: "AI Resume Builder", href: "/dashboard/resume", icon: FileText },
       { label: "ATS Scanner", href: "/dashboard/ats", icon: ScanSearch },
       { label: "Portfolio Generator", href: "/dashboard/portfolio", icon: Layout },

@@ -10,6 +10,10 @@ if (!apiKey) {
 
 export const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
+/** Groq model priority chain — first available / non-empty response wins. */
+export const GROQ_PRIMARY_MODEL = "openai/gpt-oss-120b";
+export const GROQ_FALLBACK_MODEL = "llama-3.3-70b-versatile";
+
 /**
  * Checks whether an error is transient (e.g. 503 high demand, 429 rate limit, 502/504 gateway, network failure).
  * Returns false for permanent client errors like invalid API keys or malformed requests.
@@ -140,25 +144,28 @@ export async function generateContent(prompt: string, systemInstruction?: string
     throw new Error("AI service is currently unavailable. Please try again in a few moments.");
   }
 
-  try {
-    const groq = new Groq({ apiKey: groqApiKey });
-    const messages: any[] = [];
-    if (systemInstruction) {
-      messages.push({ role: "system", content: systemInstruction });
-    }
-    messages.push({ role: "user", content: prompt });
-
-    const completion = await groq.chat.completions.create({
-      model: "openai/gpt-oss-120b",
-      messages,
-      temperature: 0.5,
-    });
-
-    return completion.choices[0]?.message?.content || "";
-  } catch (groqErr: any) {
-    console.error("Groq fallback error:", groqErr);
-    throw new Error("AI models are currently experiencing high demand. Please try again in a few moments.");
+  const groq = new Groq({ apiKey: groqApiKey });
+  const messages: any[] = [];
+  if (systemInstruction) {
+    messages.push({ role: "system", content: systemInstruction });
   }
+  messages.push({ role: "user", content: prompt });
+
+  // Try primary model first, fall back to secondary if empty response
+  for (const model of [GROQ_PRIMARY_MODEL, GROQ_FALLBACK_MODEL]) {
+    try {
+      const completion = await groq.chat.completions.create({ model, messages, temperature: 0.5 });
+      const text = completion.choices[0]?.message?.content;
+      if (text) return text;
+      console.warn(`[generateContent] Groq model ${model} returned empty content, trying fallback...`);
+    } catch (groqErr: any) {
+      console.warn(`[generateContent] Groq model ${model} error: ${groqErr?.message}`);
+      if (model === GROQ_FALLBACK_MODEL) {
+        throw new Error("AI models are currently experiencing high demand. Please try again in a few moments.");
+      }
+    }
+  }
+  throw new Error("AI models are currently experiencing high demand. Please try again in a few moments.");
 }
 
 /**
@@ -174,16 +181,27 @@ export async function generateContentFromParts(
     const textParts = parts.filter((p) => typeof p === "string" || (p && p.text)).map((p) => p.text || p);
     if (textParts.length > 0 && process.env.GROQ_API_KEY) {
       const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-      const completion = await groq.chat.completions.create({
-        model: "openai/gpt-oss-120b",
-        messages: [
-          ...(systemInstruction ? [{ role: "system" as const, content: systemInstruction }] : []),
-          { role: "user" as const, content: textParts.join("\n") },
-        ],
-        temperature: 0.2,
-        response_format: responseMimeType === "application/json" ? { type: "json_object" } : undefined,
-      });
-      return completion.choices[0]?.message?.content || "{}";
+      const groqMessages = [
+        ...(systemInstruction ? [{ role: "system" as const, content: systemInstruction }] : []),
+        { role: "user" as const, content: textParts.join("\n").slice(0, 14000) },
+      ];
+      const responseFormat = responseMimeType === "application/json" ? { type: "json_object" as const } : undefined;
+      for (const model of [GROQ_PRIMARY_MODEL, GROQ_FALLBACK_MODEL]) {
+        try {
+          const completion = await groq.chat.completions.create({
+            model,
+            messages: groqMessages,
+            temperature: 0.2,
+            response_format: responseFormat,
+          });
+          const text = completion.choices[0]?.message?.content;
+          if (text) return text;
+          console.warn(`[generateContentFromParts no-gemini] Groq model ${model} returned empty, trying fallback...`);
+        } catch (groqErr: any) {
+          console.warn(`[generateContentFromParts no-gemini] Groq ${model} error: ${groqErr?.message}`);
+        }
+      }
+      return "{}";
     }
     throw new Error("Gemini AI is not initialized. Please check configuration.");
   }
@@ -211,20 +229,27 @@ export async function generateContentFromParts(
     const textParts = parts.filter((p) => typeof p === "string" || (p && p.text)).map((p) => p.text || p);
     if (textParts.length > 0 && process.env.GROQ_API_KEY) {
       console.warn("Gemini parts call failed with transient error. Falling back to Groq for text content...");
-      try {
-        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-        const completion = await groq.chat.completions.create({
-          model: "openai/gpt-oss-120b",
-          messages: [
-            ...(systemInstruction ? [{ role: "system" as const, content: systemInstruction }] : []),
-            { role: "user" as const, content: textParts.join("\n") },
-          ],
-          temperature: 0.2,
-          response_format: responseMimeType === "application/json" ? { type: "json_object" } : undefined,
-        });
-        return completion.choices[0]?.message?.content || "{}";
-      } catch (groqErr) {
-        console.error("Groq fallback also failed:", groqErr);
+      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+      const groqMessages = [
+        ...(systemInstruction ? [{ role: "system" as const, content: systemInstruction }] : []),
+        { role: "user" as const, content: textParts.join("\n").slice(0, 14000) },
+      ];
+      const responseFormat = responseMimeType === "application/json" ? { type: "json_object" as const } : undefined;
+      for (const model of [GROQ_PRIMARY_MODEL, GROQ_FALLBACK_MODEL]) {
+        try {
+          const completion = await groq.chat.completions.create({
+            model,
+            messages: groqMessages,
+            temperature: 0.2,
+            response_format: responseFormat,
+          });
+          const text = completion.choices[0]?.message?.content;
+          if (text) return text;
+          console.warn(`[generateContentFromParts] Groq model ${model} returned empty content, trying fallback...`);
+        } catch (groqErr: any) {
+          console.warn(`[generateContentFromParts] Groq model ${model} error: ${groqErr?.message}`);
+          if (model === GROQ_FALLBACK_MODEL) console.error("Both Groq models failed.", groqErr);
+        }
       }
     }
 
@@ -234,108 +259,117 @@ export async function generateContentFromParts(
 
 /**
  * Resilient PDF text extraction helper that handles uncompressed and zlib FlateDecode streams,
- * Tj string operators, TJ array operators, and hex-encoded text.
+ * length-based stream slicing, intra-word kerning in TJ arrays, Tj string operators,
+ * UTF-16BE/ASCII hex strings, ligatures, and character normalization.
  */
 export function extractTextFromPdfBuffer(buffer: Buffer): string {
   if (!buffer || buffer.length === 0) return "";
 
   const textPieces: string[] = [];
-  const rawString = buffer.toString("binary");
+  const rawBinary = buffer.toString("binary");
+
+  function decodeOctalString(str: string): string {
+    return str
+      .replace(/\\([()\\])/g, "$1")
+      .replace(/\\r/g, "\n")
+      .replace(/\\n/g, "\n")
+      .replace(/\\t/g, " ")
+      .replace(/\\b/g, "")
+      .replace(/\\f/g, "")
+      .replace(/\\([0-7]{1,3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)));
+  }
+
+  function decodeHexString(hexRaw: string): string {
+    const hex = hexRaw.replace(/\s+/g, "");
+    if (hex.length < 2 || hex.length % 2 !== 0) return "";
+    try {
+      if (hex.length % 4 === 0 && hex.startsWith("00")) {
+        return Buffer.from(hex, "hex").swap16().toString("utf16le").replace(/[^\x20-\x7E\t\n]/g, " ");
+      } else {
+        return Buffer.from(hex, "hex").toString("utf8").replace(/[^\x20-\x7E\t\n]/g, " ");
+      }
+    } catch {
+      return "";
+    }
+  }
 
   function extractFromStreamText(streamText: string) {
     if (!streamText) return;
 
-    // 1. Tj operators: (string) Tj or ' or " with support for escaped parens
-    const tjRegex = /\(((?:[^()\\]|\\.)*)\)\s*(?:Tj|'|")/g;
-    let match;
-    while ((match = tjRegex.exec(streamText)) !== null) {
-      if (match[1]) {
-        const cleaned = match[1]
-          .replace(/\\([()\\])/g, "$1")
-          .replace(/\\r/g, " ")
-          .replace(/\\n/g, " ")
-          .replace(/\\t/g, " ")
-          .replace(/\\([0-7]{1,3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)))
-          .trim();
-        if (cleaned.length > 0) textPieces.push(cleaned);
-      }
-    }
-
-    // 2. TJ array operators: [(str1) 20 (str2) <00480065> 10 (str3)] TJ
+    // 1. Process TJ Array operators: [(str1) -20 (str2) 200 (str3)] TJ
+    // Respect kerning: adjacent characters are concatenated without spaces,
+    // while spacing kerning (displacement <= -150 or >= 150) inserts a word boundary space.
     const tjArrayRegex = /\[((?:[^[\]\\]|\\.)*)\]\s*TJ/gi;
+    let match;
     while ((match = tjArrayRegex.exec(streamText)) !== null) {
       const inner = match[1];
-      const arrayPieces: string[] = [];
-
-      // Extract string tokens (...) and hex tokens <...> within TJ array
-      const tokenRegex = /\(((?:[^()\\]|\\.)*)\)|<([0-9a-fA-F\s]+)>/g;
+      const tokenRegex = /\(((?:[^()\\]|\\.)*)\)|<([0-9a-fA-F\s]+)>|([-+]?\d+(?:\.\d+)?)/g;
       let tokenMatch;
+      let lineAcc = "";
+
       while ((tokenMatch = tokenRegex.exec(inner)) !== null) {
         if (tokenMatch[1] !== undefined) {
-          const str = tokenMatch[1]
-            .replace(/\\([()\\])/g, "$1")
-            .replace(/\\r/g, " ")
-            .replace(/\\n/g, " ")
-            .replace(/\\t/g, " ")
-            .replace(/\\([0-7]{1,3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)));
-          if (str) arrayPieces.push(str);
+          const decoded = decodeOctalString(tokenMatch[1]);
+          lineAcc += decoded;
         } else if (tokenMatch[2] !== undefined) {
-          const hex = tokenMatch[2].replace(/\s+/g, "");
-          if (hex.length >= 2 && hex.length % 2 === 0) {
-            try {
-              // Try UTF-16BE if length is multiple of 4 and starts with 00
-              if (hex.length % 4 === 0 && hex.startsWith("00")) {
-                const utf16 = Buffer.from(hex, "hex").swap16().toString("utf16le");
-                const cleaned = utf16.replace(/[^\x20-\x7E\t\n]/g, " ").trim();
-                if (cleaned) arrayPieces.push(cleaned);
-              } else {
-                const ascii = Buffer.from(hex, "hex").toString("utf8");
-                const cleaned = ascii.replace(/[^\x20-\x7E\t\n]/g, " ").trim();
-                if (cleaned) arrayPieces.push(cleaned);
-              }
-            } catch {
-              // Ignore hex decode failure
+          const decoded = decodeHexString(tokenMatch[2]);
+          lineAcc += decoded;
+        } else if (tokenMatch[3] !== undefined) {
+          const displacement = parseFloat(tokenMatch[3]);
+          if (displacement <= -150 || displacement >= 150) {
+            if (lineAcc.length > 0 && !lineAcc.endsWith(" ")) {
+              lineAcc += " ";
             }
           }
         }
       }
 
-      if (arrayPieces.length > 0) {
-        textPieces.push(arrayPieces.join(" "));
+      if (lineAcc.trim().length > 0) {
+        textPieces.push(lineAcc.trim());
       }
     }
 
-    // 3. Hex string Tj operators: <48656c6c6f> Tj
+    // 2. Process Tj string operators: (string) Tj or ' or "
+    const tjRegex = /\(((?:[^()\\]|\\.)*)\)\s*(?:Tj|'|")/g;
+    while ((match = tjRegex.exec(streamText)) !== null) {
+      if (match[1]) {
+        const decoded = decodeOctalString(match[1]).trim();
+        if (decoded.length > 0) textPieces.push(decoded);
+      }
+    }
+
+    // 3. Process Hex string Tj operators: <48656c6c6f> Tj
     const hexTjRegex = /<([0-9a-fA-F\s]+)>\s*(?:Tj|'|")/g;
     while ((match = hexTjRegex.exec(streamText)) !== null) {
-      const hex = match[1].replace(/\s+/g, "");
-      if (hex.length >= 2 && hex.length % 2 === 0) {
-        try {
-          if (hex.length % 4 === 0 && hex.startsWith("00")) {
-            const utf16 = Buffer.from(hex, "hex").swap16().toString("utf16le");
-            const cleaned = utf16.replace(/[^\x20-\x7E\t\n]/g, " ").trim();
-            if (cleaned) textPieces.push(cleaned);
-          } else {
-            const ascii = Buffer.from(hex, "hex").toString("utf8");
-            const cleaned = ascii.replace(/[^\x20-\x7E\t\n]/g, " ").trim();
-            if (cleaned) textPieces.push(cleaned);
-          }
-        } catch {
-          // ignore hex decode errors
-        }
+      if (match[1]) {
+        const decoded = decodeHexString(match[1]).trim();
+        if (decoded.length > 0) textPieces.push(decoded);
       }
     }
   }
 
-  // 1. Extract from all stream ... endstream blocks (decompressing FlateDecode)
-  const streamRegex = /stream\r?\n([\s\S]*?)\r?\nendstream/g;
-  let streamMatch;
+  // 1. Scan and decompress streams with /Length support
+  const objectRegex = /<<([\s\S]*?)>>\s*stream\r?\n([\s\S]*?)\r?\nendstream/g;
+  let objMatch;
+  let foundStreams = 0;
 
-  while ((streamMatch = streamRegex.exec(rawString)) !== null) {
-    const streamContent = streamMatch[1];
-    const streamBuffer = Buffer.from(streamContent, "binary");
+  while ((objMatch = objectRegex.exec(rawBinary)) !== null) {
+    foundStreams++;
+    const dictHeader = objMatch[1];
+    let streamRaw = objMatch[2];
 
+    const lengthMatch = dictHeader.match(/\/Length\s+(\d+)/);
+    if (lengthMatch) {
+      const explicitLen = parseInt(lengthMatch[1], 10);
+      const streamStartPos = objMatch.index + objMatch[0].indexOf("stream") + (rawBinary.charAt(objMatch.index + objMatch[0].indexOf("stream") + 6) === "\r" ? 8 : 7);
+      if (streamStartPos + explicitLen <= buffer.length) {
+        streamRaw = rawBinary.slice(streamStartPos, streamStartPos + explicitLen);
+      }
+    }
+
+    const streamBuffer = Buffer.from(streamRaw, "binary");
     let decompressed: string | null = null;
+
     try {
       decompressed = zlib.inflateSync(streamBuffer).toString("utf8");
     } catch {
@@ -345,7 +379,7 @@ export function extractTextFromPdfBuffer(buffer: Buffer): string {
         try {
           decompressed = zlib.unzipSync(streamBuffer).toString("utf8");
         } catch {
-          decompressed = streamContent;
+          decompressed = streamRaw;
         }
       }
     }
@@ -355,28 +389,80 @@ export function extractTextFromPdfBuffer(buffer: Buffer): string {
     }
   }
 
-  // 2. If no streams yielded text, scan raw PDF content for standard text string blocks
-  if (textPieces.length === 0) {
-    extractFromStreamText(rawString);
+  // 2. Generic stream ... endstream fallback if object header regex missed
+  if (foundStreams === 0 || textPieces.length === 0) {
+    const genericStreamRegex = /stream\r?\n([\s\S]*?)\r?\nendstream/g;
+    let genMatch;
+    while ((genMatch = genericStreamRegex.exec(rawBinary)) !== null) {
+      const streamContent = genMatch[1];
+      const streamBuf = Buffer.from(streamContent, "binary");
+      let decompressed: string | null = null;
+      try {
+        decompressed = zlib.inflateSync(streamBuf).toString("utf8");
+      } catch {
+        try {
+          decompressed = zlib.inflateRawSync(streamBuf).toString("utf8");
+        } catch {
+          decompressed = streamContent;
+        }
+      }
+      if (decompressed) {
+        extractFromStreamText(decompressed);
+      }
+    }
   }
 
-  return textPieces.join(" ").replace(/\s+/g, " ").trim();
+  // 3. Fallback to raw binary scan if still empty
+  if (textPieces.length === 0) {
+    extractFromStreamText(rawBinary);
+  }
+
+  return textPieces
+    .join(" ")
+    .replace(/\uFB01/g, "fi")
+    .replace(/\uFB02/g, "fl")
+    .replace(/\uFB03/g, "ffi")
+    .replace(/\uFB04/g, "ffl")
+    .replace(/\uFB00/g, "ff")
+    .replace(/\uFB05/g, "st")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/[\u2022\u2023\u25CF\u25E6\u2043\u2219]/g, " • ")
+    .replace(/\u00A0/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\s*\n\s*/g, "\n")
+    .trim();
 }
 
 /**
  * Standard technical skill dictionary used for deterministic safety-net detection
  */
 export const KNOWN_TECHNICAL_SKILLS = [
+  // Programming Languages
   "JavaScript", "TypeScript", "Python", "Java", "C++", "C#", "C", "Go", "Golang", "Rust", "Ruby",
   "PHP", "Swift", "Kotlin", "Dart", "Scala", "R", "SQL", "HTML", "HTML5", "CSS", "CSS3",
-  "React", "React.js", "ReactJS", "Next.js", "NextJS", "Vue", "Vue.js", "Angular", "Svelte",
+  // Web & Frontend Technologies
+  "React", "React.js", "ReactJS", "Next.js", "NextJS", "Vue", "Vue.js", "VueJS", "Angular", "Svelte",
   "Tailwind CSS", "TailwindCSS", "Tailwind", "Bootstrap", "Redux", "Zustand", "GraphQL", "REST API", "APIs",
+  // Backend & Runtime
   "Node.js", "NodeJS", "Node", "Express", "Express.js", "NestJS", "FastAPI", "Django", "Flask", "Spring Boot",
+  "Flutter", "React Native",
+  // Databases & Storage
   "PostgreSQL", "Postgres", "MySQL", "MongoDB", "Redis", "SQLite", "Prisma", "Cassandra", "Supabase", "Firebase",
+  "DynamoDB", "Elasticsearch",
+  // Cloud, DevOps & Systems
   "Docker", "Kubernetes", "K8s", "AWS", "Amazon Web Services", "GCP", "Google Cloud", "Azure",
-  "CI/CD", "GitHub Actions", "Git", "GitHub", "Linux", "Terraform", "Shell", "Bash", "Jest", "Pytest", "Vitest",
-  "Cypress", "Playwright", "TensorFlow", "PyTorch", "Pandas", "NumPy", "Scikit-Learn", "Machine Learning",
-  "Deep Learning", "Data Analysis", "System Design", "Microservices", "WebSockets", "Kafka", "RabbitMQ", "Flutter"
+  "CI/CD", "GitHub Actions", "Git", "GitHub", "GitLab", "Linux", "Terraform", "Shell", "Bash", "Helm", "Prometheus", "Grafana",
+  // Testing & QA
+  "Testing", "Jest", "Pytest", "Vitest", "Cypress", "Playwright",
+  // AI, Data & Machine Learning
+  "AI/ML", "Machine Learning", "Deep Learning", "Data Analysis", "Data Science", "Artificial Intelligence",
+  "TensorFlow", "PyTorch", "Pandas", "NumPy", "Scikit-Learn", "Keras", "OpenCV", "NLP", "Computer Vision", "LLMs",
+  // Engineering Concepts
+  "OOP", "Object-Oriented Programming", "Data Structures", "Algorithms", "System Design", "Microservices", "API Development",
+  // Developer Tools & Design
+  "VS Code", "Visual Studio Code", "Figma", "Postman", "Jira"
 ];
 
 /**
@@ -387,9 +473,6 @@ export function extractSkillsFromText(text: string): string[] {
   if (!text || typeof text !== "string") return [];
 
   const foundSkills = new Set<string>();
-
-  // Specific contextual checks for tricky/ambiguous tokens
-  const lowerText = text.toLowerCase();
 
   // 1. Java (must NOT match JavaScript)
   if (/\bjava\b(?!script|[a-z])/i.test(text)) {
@@ -416,15 +499,20 @@ export function extractSkillsFromText(text: string): string[] {
     foundSkills.add("C#");
   }
 
-  // 6. C (strict context check to prevent false positives from grade C, vitamin C, bullet C, etc.)
+  // 6. .NET
+  if (/(?:^|[\s,;:(/])(?:\.net|dotnet|net\s+core|asp\.net)(?:$|[\s,;:./)\]])/i.test(text)) {
+    foundSkills.add(".NET");
+  }
+
+  // 7. C (strict context check to prevent false positives from grade C, vitamin C, bullet C, CSS, etc.)
   if (
     /\b(?:ansi\s+c|c\s+programming|c\s+language|c\s*\/\s*c\+\+|embedded\s+c)\b/i.test(text) ||
-    /(?:languages|technical\s+skills)\s*:[^.\n]*?\bc\b(?!\+\+|#|[a-z])/i.test(text)
+    /(?:languages|technical\s+skills|programming\s+languages)\s*:[^.\n]*?\bc\b(?!\+\+|#|[a-z])/i.test(text)
   ) {
     foundSkills.add("C");
   }
 
-  // 7. R (strict context check to prevent false positives from (R), R&D, bullet R, middle initial)
+  // 8. R (strict context check to prevent false positives from (R), R&D, bullet R, middle initial, React, Rust)
   if (
     /\b(?:r\s+programming|r\s+language|rstudio|r\s+studio|r\s*\/\s*python|python\s*\/\s*r|cran|r-project)\b/i.test(text) ||
     /(?:languages|programming\s+languages)\s*:[^.\n]*?\br\b(?![a-z])/i.test(text)
@@ -432,19 +520,95 @@ export function extractSkillsFromText(text: string): string[] {
     foundSkills.add("R");
   }
 
-  // 8. Go / Golang
-  if (/\bgolang\b/i.test(text) || /\bgo\s+(?:language|programming|developer|backend|microservices)\b/i.test(text)) {
+  // 9. Go / Golang (recognized via golang, go language/programming/backend, or listed in tech skills/languages list)
+  if (
+    /\bgolang\b/i.test(text) ||
+    /\bgo\s+(?:lang|language|programming|developer|backend|microservices|code)\b/i.test(text) ||
+    /(?:languages?|skills?|proficient in|technologies?|stack)\s*:[^.\n]*?\bgo\b/i.test(text) ||
+    /(?:java|python|rust|c\+\+|kotlin|typescript|c#|scala|ruby)\s*,\s*go\b/i.test(text) ||
+    /\bgo\s*,\s*(?:rust|java|python|kotlin|typescript|sql|c\+\+)/i.test(text)
+  ) {
     foundSkills.add("Go");
   }
 
-  // 9. Standard vocabulary skills (excluding manually handled tokens: Java, JavaScript, TypeScript, C++, C#, C, R, Go, Golang)
-  const skipManual = new Set(["Java", "JavaScript", "TypeScript", "C++", "C#", "C", "R", "Go", "Golang"]);
+  // 10. OOP / Object-Oriented Programming
+  if (/\b(?:oop|oops|object[\s-]oriented\s+programming)\b/i.test(text)) {
+    foundSkills.add("OOP");
+  }
+
+  // 11. AI/ML / Machine Learning / Deep Learning
+  if (/\b(?:ai\s*[\/&]\s*ml|ai\s+and\s+ml)\b/i.test(text)) {
+    foundSkills.add("AI/ML");
+  }
+  if (/\bmachine\s+learning\b/i.test(text)) {
+    foundSkills.add("Machine Learning");
+  }
+  if (/\bdeep\s+learning\b/i.test(text)) {
+    foundSkills.add("Deep Learning");
+  }
+  if (/\bdata\s+analysis\b/i.test(text)) {
+    foundSkills.add("Data Analysis");
+  }
+
+  // 12. VS Code / Visual Studio Code
+  if (/\b(?:vs\s*code|visual\s+studio\s+code)\b/i.test(text)) {
+    foundSkills.add("VS Code");
+  }
+
+  // 13. Figma
+  if (/\bfigma\b/i.test(text)) {
+    foundSkills.add("Figma");
+  }
+
+  // 14. Data Structures & Algorithms
+  if (/\bdata\s+structures?\b/i.test(text)) {
+    foundSkills.add("Data Structures");
+  }
+  if (/\balgorithms?\b/i.test(text)) {
+    foundSkills.add("Algorithms");
+  }
+  if (/\bdsa\b/i.test(text)) {
+    foundSkills.add("Data Structures");
+    foundSkills.add("Algorithms");
+  }
+
+  // 15. Testing / QA
+  if (/\b(?:unit\s+testing|integration\s+testing|test[\s-]driven\s+development|automated\s+testing|tdd)\b/i.test(text)) {
+    foundSkills.add("Testing");
+  }
+
+  // 16. API Development / REST API
+  if (/\b(?:api\s+development|restful\s+apis?|rest\s+api|api\s+design)\b/i.test(text)) {
+    foundSkills.add("REST API");
+    foundSkills.add("API Development");
+  }
+
+  // 17. CI/CD
+  if (/\b(?:ci\s*[\/]\s*cd|continuous\s+integration|github\s+actions)\b/i.test(text)) {
+    foundSkills.add("CI/CD");
+  }
+
+  // 18. Node.js and Next.js distinct recognition
+  if (/\b(?:node\.?js|nodejs)\b/i.test(text)) {
+    foundSkills.add("Node.js");
+  }
+  if (/\b(?:next\.?js|nextjs)\b/i.test(text)) {
+    foundSkills.add("Next.js");
+  }
+
+  // 19. Standard vocabulary scanner
+  const manuallyHandled = new Set([
+    "Java", "JavaScript", "TypeScript", "C++", "C#", "C", ".NET", "R", "Go", "Golang",
+    "OOP", "Object-Oriented Programming", "AI/ML", "Machine Learning", "Deep Learning", "Data Analysis",
+    "VS Code", "Visual Studio Code", "Figma", "Data Structures", "Algorithms", "Testing",
+    "REST API", "APIs", "API Development", "CI/CD", "Node.js", "NodeJS", "Node", "Next.js", "NextJS"
+  ]);
 
   for (const skill of KNOWN_TECHNICAL_SKILLS) {
-    if (skipManual.has(skill)) continue;
+    if (manuallyHandled.has(skill)) continue;
 
     const escaped = skill.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
-    const regex = new RegExp(`(?:^|[\\s,;:.(/\\[\\]{|])${escaped}(?:$|[\\s,;:.)\\]/}|])`, "i");
+    const regex = new RegExp(`(?:^|[\\s,;:.(/\\[\\]{|•])${escaped}(?:$|[\\s,;:.)\\]/}|•])`, "i");
 
     if (regex.test(text)) {
       foundSkills.add(skill);

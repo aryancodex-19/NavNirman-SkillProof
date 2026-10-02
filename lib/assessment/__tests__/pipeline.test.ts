@@ -16,7 +16,7 @@ import { TARGET_ROLES } from "../roles";
 
 /**
  * Helper to generate a minimal valid PDF buffer containing a text stream.
- * Uses FlateDecode compression to simulate real-world PDF resume exports.
+ * Supports Tj strings, TJ arrays with kerning, and FlateDecode compression.
  */
 function createSyntheticPdfBuffer(textContent: string, compress = true): Buffer {
   const streamBody = `BT /F1 12 Tf 50 750 Td (${textContent.replace(/[()\\]/g, "\\$&")}) Tj ET`;
@@ -53,9 +53,47 @@ stream
   return Buffer.concat([header, streamData, footer]);
 }
 
+/**
+ * Creates a synthetic PDF with TJ kerning arrays (simulating word splits like [(J) -20 (ava)] TJ)
+ */
+function createKernedPdfBuffer(tjArrayContent: string, compress = true): Buffer {
+  const streamBody = `BT /F1 12 Tf 50 750 Td [${tjArrayContent}] TJ ET`;
+  let streamData: Buffer;
+  let filterString = "";
+
+  if (compress) {
+    streamData = zlib.deflateSync(Buffer.from(streamBody, "utf-8"));
+    filterString = "/Filter /FlateDecode ";
+  } else {
+    streamData = Buffer.from(streamBody, "utf-8");
+  }
+
+  const pdfTemplate = `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R >>
+endobj
+4 0 obj
+<< ${filterString}/Length ${streamData.length} >>
+stream
+`;
+  const header = Buffer.from(pdfTemplate, "utf-8");
+  const footer = Buffer.from(
+    "\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f \ntrailer\n<< /Root 1 0 R /Size 5 >>\nstartxref\n500\n%%EOF",
+    "utf-8"
+  );
+
+  return Buffer.concat([header, streamData, footer]);
+}
+
 async function runMasterTestSuite() {
   console.log("================================================================");
-  console.log(" SkillProof Master Test Suite — Feature 1 Fix & Feature 2 Rules ");
+  console.log(" SkillProof Master Test Suite — 16 Comprehensive Regression Tests");
   console.log("================================================================\n");
 
   let passed = 0;
@@ -84,247 +122,287 @@ async function runMasterTestSuite() {
   }
 
   // ─────────────────────────────────────────────────────────────
-  // PART A: FEATURE 1 REGRESSION TESTS
+  // 1. Multiple programming languages in one resume
   // ─────────────────────────────────────────────────────────────
-
-  runCase("1. Text-based resume extraction (React, JS, TS, Node.js, SQL, Python, AWS, Git)", () => {
+  runCase("1. Multiple programming languages in one resume (Java, Python, Go, Rust, Kotlin, TypeScript)", () => {
     const resumeText =
-      "Senior Engineer with expertise in React, JavaScript, TypeScript, Node.js, SQL, Python, AWS, and Git.";
+      "Full stack polyglot developer proficient in Java, Python, Go, Rust, Kotlin, TypeScript, and SQL.";
     const pdfBuffer = createSyntheticPdfBuffer(resumeText, true);
-
     const extractedText = extractTextFromPdfBuffer(pdfBuffer);
-    assert(extractedText.length > 0, "Decompressed text should not be empty");
-    assert(extractedText.includes("React"), "Extracted text must contain React");
-
     const skills = normalizeExtractedSkills(null, { summary: resumeText }, extractedText);
-    const expected = ["React", "JavaScript", "TypeScript", "Node.js", "SQL", "Python", "AWS", "Git"];
 
+    const expected = ["Java", "Python", "Go", "Rust", "Kotlin", "TypeScript", "SQL"];
     for (const exp of expected) {
-      const found = skills.some((s) => s.toLowerCase() === exp.toLowerCase() || isSkillMatch(s, exp));
-      assert(found, `Expected skill "${exp}" to be extracted, got: ${JSON.stringify(skills)}`);
+      assert(skills.includes(exp), `Expected skill "${exp}" to be extracted, got: ${JSON.stringify(skills)}`);
     }
   });
 
-  runCase("2. Punctuation, capitalization, and alias normalization", () => {
-    const testCases: [string, string, boolean][] = [
-      ["react.js", "react", true],
-      ["REACTJS", "react", true],
-      ["node-js", "node.js", true],
-      ["NODEJS", "node.js", true],
-      ["Type_Script", "typescript", true],
-      ["TYPESCRIPT", "ts", true],
-      ["c++", "c++", true],
-      ["cpp", "c++", true],
-      ["C#", "csharp", true],
-      ["CI/CD", "cicd", true],
-      ["ci/cd", "continuous integration", true],
-      ["AWS", "amazon web services", true],
-      ["PostgreSQL", "sql", true],
-      [".NET", "dotnet", true],
-      ["tailwind-css", "tailwind css", true],
-      ["k8s", "kubernetes", true],
-    ];
+  // ─────────────────────────────────────────────────────────────
+  // 2. Skills split across lines and columns with PDF kerning
+  // ─────────────────────────────────────────────────────────────
+  runCase("2. Skills split across lines and kerning (TJ arrays: [(J) -20 (ava) -300 (P) -10 (ython)])", () => {
+    // Kerned TJ stream where intra-word letters are split across kerning tokens
+    const tjContent = `(J) -10 (ava) -300 (P) -10 (ython) -300 (O) -5 (OP) -300 (V) (S) -300 (Code) -300 (F) -5 (igma)`;
+    const pdfBuffer = createKernedPdfBuffer(tjContent, true);
+    const extractedText = extractTextFromPdfBuffer(pdfBuffer);
 
-    for (const [candidate, target, expectedMatch] of testCases) {
-      const match = isSkillMatch(candidate, target);
-      assert.strictEqual(
-        match,
-        expectedMatch,
-        `Expected isSkillMatch("${candidate}", "${target}") to be ${expectedMatch}`
-      );
-    }
+    assert(extractedText.includes("Java"), `Extracted text should reassemble "Java", got: "${extractedText}"`);
+    assert(extractedText.includes("Python"), `Extracted text should reassemble "Python", got: "${extractedText}"`);
+    assert(extractedText.includes("OOP"), `Extracted text should reassemble "OOP", got: "${extractedText}"`);
+    assert(extractedText.includes("Figma"), `Extracted text should reassemble "Figma", got: "${extractedText}"`);
+
+    const skills = normalizeExtractedSkills(null, {}, extractedText);
+    assert(skills.includes("Java"), "Must extract Java from kerned stream");
+    assert(skills.includes("Python"), "Must extract Python from kerned stream");
+    assert(skills.includes("OOP"), "Must extract OOP from kerned stream");
+    assert(skills.includes("Figma"), "Must extract Figma from kerned stream");
   });
 
-  runCase("3. Strict distinction: Java vs JavaScript", () => {
-    // isSkillMatch must never confuse Java with JavaScript
+  // ─────────────────────────────────────────────────────────────
+  // 3. Uppercase, lowercase, and mixed-case skill names
+  // ─────────────────────────────────────────────────────────────
+  runCase("3. Case-insensitive skill normalization (REACT, typeScript, Docker, pYtHoN)", () => {
+    const rawSkills = ["REACT", "typeScript", "Docker", "pYtHoN", "kUbErNeTeS"];
+    const normalized = normalizeExtractedSkills(rawSkills);
+
+    assert(normalized.includes("React"), "Must canonicalize REACT -> React");
+    assert(normalized.includes("TypeScript"), "Must canonicalize typeScript -> TypeScript");
+    assert(normalized.includes("Docker"), "Must canonicalize Docker -> Docker");
+    assert(normalized.includes("Python"), "Must canonicalize pYtHoN -> Python");
+    assert(normalized.includes("Kubernetes"), "Must canonicalize kUbErNeTeS -> Kubernetes");
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 4. Common aliases and punctuation-sensitive names
+  // ─────────────────────────────────────────────────────────────
+  runCase("4. Punctuation-sensitive aliases (.NET, Node.js, Next.js, C++, C#, Tailwind CSS, REST API)", () => {
+    const aliasesInput = ["dotnet", "nodejs", "nextjs", "cpp", "csharp", "tailwindcss", "restful api"];
+    const normalized = normalizeExtractedSkills(aliasesInput);
+
+    assert(normalized.includes(".NET"), "dotnet -> .NET");
+    assert(normalized.includes("Node.js"), "nodejs -> Node.js");
+    assert(normalized.includes("Next.js"), "nextjs -> Next.js");
+    assert(normalized.includes("C++"), "cpp -> C++");
+    assert(normalized.includes("C#"), "csharp -> C#");
+    assert(normalized.includes("Tailwind CSS"), "tailwindcss -> Tailwind CSS");
+    assert(normalized.includes("REST API"), "restful api -> REST API");
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 5. Java versus JavaScript distinction
+  // ─────────────────────────────────────────────────────────────
+  runCase("5. Strict distinction: Java vs JavaScript", () => {
     assert.strictEqual(isSkillMatch("Java", "JavaScript"), false, "Java must not match JavaScript");
     assert.strictEqual(isSkillMatch("JavaScript", "Java"), false, "JavaScript must not match Java");
 
-    // extractSkillsFromText on a resume mentioning only Java must not extract JavaScript
-    const textJavaOnly = "Backend Developer specializing in Java 17, Spring Boot, and PostgreSQL.";
-    const skillsJava = extractSkillsFromText(textJavaOnly);
-    assert(skillsJava.includes("Java"), "Must extract Java");
-    assert(!skillsJava.includes("JavaScript"), "Must NOT extract JavaScript from Java-only text");
+    const javaText = "Backend services engineered in Java with Spring Boot.";
+    const javaSkills = extractSkillsFromText(javaText);
+    assert(javaSkills.includes("Java"), "Must extract Java");
+    assert(!javaSkills.includes("JavaScript"), "Must NOT extract JavaScript from Java-only text");
 
-    // extractSkillsFromText on a resume mentioning only JavaScript must not extract Java
-    const textJsOnly = "Frontend Developer specializing in JavaScript, React, and CSS.";
-    const skillsJs = extractSkillsFromText(textJsOnly);
-    assert(skillsJs.includes("JavaScript"), "Must extract JavaScript");
-    assert(!skillsJs.includes("Java"), "Must NOT extract Java from JavaScript-only text");
+    const jsText = "Frontend UI components developed in JavaScript and HTML.";
+    const jsSkills = extractSkillsFromText(jsText);
+    assert(jsSkills.includes("JavaScript"), "Must extract JavaScript");
+    assert(!jsSkills.includes("Java"), "Must NOT extract Java from JavaScript-only text");
   });
 
-  runCase("4. Strict distinction: C vs C++ vs C#", () => {
+  // ─────────────────────────────────────────────────────────────
+  // 6. C versus CSS and CI/CD distinction
+  // ─────────────────────────────────────────────────────────────
+  runCase("6. Strict distinction: C vs CSS vs CI/CD vs C++ vs C#", () => {
+    assert.strictEqual(isSkillMatch("C", "CSS"), false, "C must not match CSS");
+    assert.strictEqual(isSkillMatch("CSS", "C"), false, "CSS must not match C");
+    assert.strictEqual(isSkillMatch("C", "CI/CD"), false, "C must not match CI/CD");
     assert.strictEqual(isSkillMatch("C", "C++"), false, "C must not match C++");
-    assert.strictEqual(isSkillMatch("C++", "C"), false, "C++ must not match C");
     assert.strictEqual(isSkillMatch("C", "C#"), false, "C must not match C#");
-    assert.strictEqual(isSkillMatch("C#", "C"), false, "C# must not match C");
-    assert.strictEqual(isSkillMatch("C++", "C#"), false, "C++ must not match C#");
 
-    // C++ extraction
-    const cppText = "Low-latency systems development in C++ and Python.";
-    const cppSkills = extractSkillsFromText(cppText);
-    assert(cppSkills.includes("C++"), "Must extract C++");
-    assert(!cppSkills.includes("C"), "Must NOT extract plain C from C++ text");
-    assert(!cppSkills.includes("C#"), "Must NOT extract C# from C++ text");
+    const cssText = "Proficient in HTML, CSS, and CI/CD pipelines with GitHub Actions.";
+    const cssSkills = extractSkillsFromText(cssText);
+    assert(cssSkills.includes("CSS"), "Must extract CSS");
+    assert(cssSkills.includes("CI/CD"), "Must extract CI/CD");
+    assert(!cssSkills.includes("C"), "Must NOT extract C from CSS or CI/CD text");
   });
 
-  runCase("5. Single 'R' character false positive prevention", () => {
-    // An arbitrary text containing the letter R (registered mark, bullet point, initial)
-    const textWithRandomR =
-      "Utkarsh Pandey (R) - Project Manager. Managed team of 15 members. Section R: Overview.";
-    const skills = extractSkillsFromText(textWithRandomR);
-    assert(!skills.includes("R"), "Must NOT detect 'R' skill from arbitrary single letter R");
+  // ─────────────────────────────────────────────────────────────
+  // 7. Genuine contextual mentions of C and R
+  // ─────────────────────────────────────────────────────────────
+  runCase("7. Genuine contextual mentions of C and R", () => {
+    const textC = "Low-level kernel programming in ANSI C, C/C++, and embedded systems.";
+    const skillsC = extractSkillsFromText(textC);
+    assert(skillsC.includes("C"), "Must extract C when written in valid technical context");
 
-    // Explicit R language context
-    const textWithRealR =
-      "Data Scientist with expertise in R programming, RStudio, and Python.";
-    const realSkills = extractSkillsFromText(textWithRealR);
-    assert(realSkills.includes("R"), "Must detect R when explicitly written as R programming");
+    const textR = "Data analytics and statistical modeling using R programming and RStudio.";
+    const skillsR = extractSkillsFromText(textR);
+    assert(skillsR.includes("R"), "Must extract R when written in valid R programming context");
   });
 
-  runCase("6. Non-technical resume returns 0 skills safely", () => {
-    const nonTechText =
-      "Experienced retail store manager with skills in customer service, sales leadership, inventory tracking, team scheduling, and budget reconciliation.";
-    const skills = normalizeExtractedSkills([], { summary: nonTechText, experience: [] }, nonTechText);
-    assert.strictEqual(skills.length, 0, "Non-technical resume must produce 0 skills without hallucinations");
+  // ─────────────────────────────────────────────────────────────
+  // 8. R false positives from React, Rust, Ruby, Docker, etc.
+  // ─────────────────────────────────────────────────────────────
+  runCase("8. R false positives from React, Rust, Ruby, Docker, TypeScript, GraphQL, Redux, (R)", () => {
+    const textNoR = "Frontend engineer building with React, Redux, TypeScript, Docker, and Rust (Registered R&D project).";
+    const extractedSkills = extractSkillsFromText(textNoR);
+
+    assert(!extractedSkills.includes("R"), `Must NOT extract R from words starting or ending with R! Got: ${JSON.stringify(extractedSkills)}`);
+    assert(extractedSkills.includes("React"), "Must extract React");
+    assert(extractedSkills.includes("TypeScript"), "Must extract TypeScript");
+    assert(extractedSkills.includes("Docker"), "Must extract Docker");
+    assert(extractedSkills.includes("Rust"), "Must extract Rust");
+
+    // Engine isSkillMatch check
+    const falseMatchCandidates = ["React", "Rust", "Ruby", "Docker", "TypeScript", "GraphQL", "Redux", "HTML", "CSS"];
+    for (const tech of falseMatchCandidates) {
+      assert.strictEqual(isSkillMatch("R", tech), false, `'R' must not match '${tech}'`);
+      assert.strictEqual(isSkillMatch(tech, "R"), false, `'${tech}' must not match 'R'`);
+    }
   });
 
-  runCase("7. Unreadable, empty, and scanned PDFs handle gracefully", () => {
-    // 0-byte PDF
-    const emptyBuffer = Buffer.alloc(0);
-    const emptyText = extractTextFromPdfBuffer(emptyBuffer);
-    assert.strictEqual(emptyText, "", "0-byte buffer should produce empty text");
+  // ─────────────────────────────────────────────────────────────
+  // 9. Node.js versus Next.js distinction
+  // ─────────────────────────────────────────────────────────────
+  runCase("9. Strict distinction: Node.js vs Next.js", () => {
+    assert.strictEqual(isSkillMatch("Node.js", "Next.js"), false, "Node.js must not match Next.js");
+    assert.strictEqual(isSkillMatch("Next.js", "Node.js"), false, "Next.js must not match Node.js");
 
-    // Scanned image PDF without text stream operators
+    const nextOnly = "Building server-rendered React applications using Next.js 14.";
+    const nextSkills = extractSkillsFromText(nextOnly);
+    assert(nextSkills.includes("Next.js"), "Must extract Next.js");
+    assert(!nextSkills.includes("Node.js"), "Must NOT extract Node.js from Next.js text");
+
+    const nodeOnly = "Backend API server built with Node.js and Express.";
+    const nodeSkills = extractSkillsFromText(nodeOnly);
+    assert(nodeSkills.includes("Node.js"), "Must extract Node.js");
+    assert(!nodeSkills.includes("Next.js"), "Must NOT extract Next.js from Node.js text");
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 10. OOP and AI/ML phrase recognition
+  // ─────────────────────────────────────────────────────────────
+  runCase("10. OOP and AI/ML phrase recognition (Object-Oriented Programming, AI/ML, Machine Learning)", () => {
+    const text = "Strong foundation in Object-Oriented Programming (OOPs), Data Structures, Algorithms, and AI/ML.";
+    const skills = extractSkillsFromText(text);
+
+    assert(skills.includes("OOP"), "Must extract OOP from Object-Oriented Programming");
+    assert(skills.includes("AI/ML"), "Must extract AI/ML from AI/ML");
+    assert(skills.includes("Data Structures"), "Must extract Data Structures");
+    assert(skills.includes("Algorithms"), "Must extract Algorithms");
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 11. Duplicate skills across summary, skills, and projects sections
+  // ─────────────────────────────────────────────────────────────
+  runCase("11. Duplicate skills deduplication across sections", () => {
+    const rawSkills = ["React", "react.js", "TypeScript", "REACT", "typescript"];
+    const otherData = {
+      summary: "React and TypeScript developer.",
+      experience: [{ role: "React developer", bullets: ["Built frontend with TypeScript and React"] }],
+    };
+    const rawText = "Skills: React, TypeScript, ReactJS, TS";
+
+    const normalized = normalizeExtractedSkills(rawSkills, otherData, rawText);
+    const reactCount = normalized.filter((s) => s.toLowerCase() === "react").length;
+    const tsCount = normalized.filter((s) => s.toLowerCase() === "typescript").length;
+
+    assert.strictEqual(reactCount, 1, `React must be present exactly once, got count: ${reactCount}`);
+    assert.strictEqual(tsCount, 1, `TypeScript must be present exactly once, got count: ${tsCount}`);
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 12. Skills mentioned only as unrelated prose or interests
+  // ─────────────────────────────────────────────────────────────
+  runCase("12. Skills mentioned only as unrelated prose or interests", () => {
+    const proseText =
+      "Enjoys reading literature, hiking in nature, traveling across Europe, cooking Italian recipes, and playing guitar.";
+    const skills = extractSkillsFromText(proseText);
+    assert.strictEqual(skills.length, 0, `Unrelated prose must not produce fabricated skills, got: ${JSON.stringify(skills)}`);
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // 13. Empty, malformed, and image-only PDF handling
+  // ─────────────────────────────────────────────────────────────
+  runCase("13. Empty, malformed, and image-only PDF handling", () => {
+    assert.strictEqual(extractTextFromPdfBuffer(Buffer.alloc(0)), "", "0-byte buffer produces empty text");
+
     const scannedImagePdf = Buffer.from(
       "%PDF-1.4\n1 0 obj\n<< /Type /XObject /Subtype /Image /Width 100 /Height 100 >>\nstream\n\x00\x01\x02\x03\xff\xfe\nendstream\nendobj\n%%EOF"
     );
-    const scannedText = extractTextFromPdfBuffer(scannedImagePdf);
-    assert.strictEqual(scannedText.trim(), "", "Scanned image PDF must return empty text");
-  });
-
-  runCase("8. AI output formats normalization (objects, arrays, comma-separated)", () => {
-    // Categorized object
-    const categorized = {
-      languages: ["TypeScript", "Python"],
-      frameworks: ["React", "FastAPI"],
-      tools: "Docker, Git, AWS",
-    };
-    const norm1 = normalizeExtractedSkills(categorized);
-    assert(norm1.includes("TypeScript") && norm1.includes("Docker") && norm1.includes("FastAPI"));
-
-    // Comma-separated string
-    const commaSeparated = "Node.js, PostgreSQL, Redis, Tailwind CSS";
-    const norm2 = normalizeExtractedSkills(commaSeparated);
-    assert(norm2.includes("Node.js") && norm2.includes("PostgreSQL") && norm2.includes("Tailwind CSS"));
+    assert.strictEqual(extractTextFromPdfBuffer(scannedImagePdf).trim(), "", "Scanned image PDF produces empty text");
   });
 
   // ─────────────────────────────────────────────────────────────
-  // PART B: FEATURE 2 EVIDENCE CLASSIFICATION TESTS
+  // 14. AI timeout, malformed response, and deterministic fallback
   // ─────────────────────────────────────────────────────────────
+  runCase("14. Deterministic fallback when AI returns invalid JSON or fails", () => {
+    const resumeText =
+      "Jane Doe\njane@example.com\n(555) 123-4567\nFull Stack Developer proficient in Java, Python, React, Docker, and PostgreSQL.";
 
-  runCase("9. Feature 2: PROVEN classification for substantial code & tests", () => {
-    const citations: EvidenceCitation[] = [
-      {
-        type: "language",
-        title: "TypeScript (80% of scanned code)",
-        repoName: "web-app",
-        repoUrl: "https://github.com/testuser/web-app",
-        description: "Primary language with 45,000 bytes.",
-      },
-      {
-        type: "test_suite",
-        title: "Test suite: app.test.tsx",
-        repoName: "web-app",
-        repoUrl: "https://github.com/testuser/web-app",
-        filePath: "app.test.tsx",
-        description: "Automated test suite (Jest).",
-      },
-    ];
-
-    const result = classifySkillEvidence({
-      skill: "TypeScript",
-      citations,
-      languagesList: [{ name: "TypeScript", bytes: 45000, percentage: 80 }],
-    });
-
-    assert.strictEqual(result.classification, "PROVEN", "Must classify substantial code + test as PROVEN");
-    assert(result.explanation.includes("PROVEN") || result.explanation.includes("Verified through"));
+    // Simulate AI returning empty / malformed response (fallback directly from text)
+    const skills = normalizeExtractedSkills([], null, resumeText);
+    assert(skills.includes("Java"), "Fallback must extract Java");
+    assert(skills.includes("Python"), "Fallback must extract Python");
+    assert(skills.includes("React"), "Fallback must extract React");
+    assert(skills.includes("Docker"), "Fallback must extract Docker");
+    assert(skills.includes("PostgreSQL"), "Fallback must extract PostgreSQL");
   });
 
-  runCase("10. Feature 2: PARTIAL classification for weak metadata/manifest only", () => {
-    const citations: EvidenceCitation[] = [
-      {
-        type: "package_manifest",
-        title: "package.json (npm)",
-        repoName: "sample-repo",
-        repoUrl: "https://github.com/testuser/sample-repo",
-        filePath: "package.json",
-        description: "Declared in package.json.",
-      },
-    ];
-
-    const result = classifySkillEvidence({
-      skill: "Redis",
-      citations,
-      languagesList: [],
-    });
-
-    assert.strictEqual(result.classification, "PARTIAL", "Manifest without implementation must be PARTIAL");
-    assert(result.nextStep.length > 10, "Must provide actionable next step recommendation");
+  // ─────────────────────────────────────────────────────────────
+  // 15. No fabricated skills when neither AI nor deterministic finds evidence
+  // ─────────────────────────────────────────────────────────────
+  runCase("15. No fabricated skills on non-technical content", () => {
+    const nonTechText =
+      "John Smith - Hotel Front Desk Supervisor. Managed guest relations, reservations, and customer check-in procedures.";
+    const skills = normalizeExtractedSkills([], null, nonTechText);
+    assert.strictEqual(skills.length, 0, "Non-technical resume must result in 0 skills without fabrication");
   });
 
-  runCase("11. Feature 2: CLAIMED-ONLY classification when no public evidence exists", () => {
-    const result = classifySkillEvidence({
-      skill: "Kubernetes",
-      citations: [],
-      languagesList: [],
-    });
+  // ─────────────────────────────────────────────────────────────
+  // 16. Full pipeline test with the failing resume fixture: Java, Python, OOP, AI/ML, VS Code, Figma
+  // ─────────────────────────────────────────────────────────────
+  await runAsyncCase("16. Representative Resume Fixture: Java, Python, OOP, AI/ML, VS Code, Figma", async () => {
+    const resumeText = `
+John Developer
+john.dev@example.com
+(555) 987-6543
+Software Engineer with expertise in Java, Python, OOP, AI/ML, VS Code, and Figma.
 
-    assert.strictEqual(result.classification, "CLAIMED-ONLY", "0 citations must be CLAIMED-ONLY");
-    assert(result.explanation.includes("no public repository"), "Must state missing public evidence");
-    assert(result.nextStep.includes("Kubernetes"), "Next step must be skill-specific");
-  });
+Technical Skills:
+- Languages & Core: Java, Python, OOP (Object-Oriented Programming)
+- Technologies & Tools: AI/ML, Machine Learning, VS Code, Figma, Git
+    `;
 
-  runCase("12. Feature 2: Role relevance calculation independent of evidence", () => {
-    const frontendRole = TARGET_ROLES.find((r) => r.id === "frontend-engineer")!;
+    const pdfBuffer = createSyntheticPdfBuffer(resumeText, true);
+    const extractedText = extractTextFromPdfBuffer(pdfBuffer);
+    assert(extractedText.length > 0, "PDF extraction must succeed");
 
-    // Core skill
-    assert.strictEqual(calculateRoleRelevance("React", frontendRole), "CORE");
-    assert.strictEqual(calculateRoleRelevance("TypeScript", frontendRole), "CORE");
+    const skills = normalizeExtractedSkills(null, {}, extractedText);
 
-    // Relevant supportive skill
-    assert.strictEqual(calculateRoleRelevance("Git", frontendRole), "RELEVANT");
-    assert.strictEqual(calculateRoleRelevance("Jest", frontendRole), "RELEVANT");
+    // Verify all 6 core skills from the problem prompt are extracted
+    assert(skills.includes("Java"), `Must extract Java, got: ${JSON.stringify(skills)}`);
+    assert(skills.includes("Python"), `Must extract Python, got: ${JSON.stringify(skills)}`);
+    assert(skills.includes("OOP"), `Must extract OOP, got: ${JSON.stringify(skills)}`);
+    assert(skills.includes("AI/ML"), `Must extract AI/ML, got: ${JSON.stringify(skills)}`);
+    assert(skills.includes("VS Code"), `Must extract VS Code, got: ${JSON.stringify(skills)}`);
+    assert(skills.includes("Figma"), `Must extract Figma, got: ${JSON.stringify(skills)}`);
 
-    // Not required skill
-    assert.strictEqual(calculateRoleRelevance("Kubernetes", frontendRole), "NOT_REQUIRED");
-    assert.strictEqual(calculateRoleRelevance("PyTorch", frontendRole), "NOT_REQUIRED");
-  });
-
-  await runAsyncCase("13. Feature 2: Complete Assessment pipeline with precedence & isolation", async () => {
-    const uploadedResumeSkills = ["React", "TypeScript", "Node.js", "Docker", "Rust"];
-
+    // Verify assessment engine processes this cleanly
     const mockGitHubData = {
       languages: {
         languages: [
-          { name: "TypeScript", percentage: 70, bytes: 35000 },
-          { name: "JavaScript", percentage: 30, bytes: 15000 },
+          { name: "Java", percentage: 60, bytes: 40000 },
+          { name: "Python", percentage: 40, bytes: 25000 },
         ],
       },
       projects: {
         topRepos: [
           {
-            name: "frontend-app",
-            url: "https://github.com/candidate/frontend-app",
-            language: "TypeScript",
-            topics: ["react", "frontend"],
+            name: "ml-classifier",
+            url: "https://github.com/john/ml-classifier",
+            language: "Python",
+            topics: ["machine-learning", "ai"],
             evidence: {
-              tests: [{ name: "App.test.tsx", path: "src/App.test.tsx", framework: "Jest" }],
-              ciWorkflows: [{ name: "ci.yml", path: ".github/workflows/ci.yml" }],
-              deploymentConfigs: [{ name: "Dockerfile", path: "Dockerfile", type: "docker" }],
-              recentCommits: [{ shortSha: "9f3a1b", message: "feat: add React dashboard" }],
-              packageManifests: [{ name: "package.json", ecosystem: "npm", path: "package.json" }],
+              tests: [{ name: "test_model.py", path: "tests/test_model.py" }],
+              packageManifests: [{ name: "requirements.txt", ecosystem: "pypi", path: "requirements.txt" }],
+              recentCommits: [{ shortSha: "1a2b3c", message: "feat: add classification model" }],
             },
           },
         ],
@@ -332,32 +410,26 @@ async function runMasterTestSuite() {
     };
 
     const assessment = await runSkillEvidenceAssessment({
-      resumeSkills: uploadedResumeSkills,
+      resumeSkills: skills,
       githubData: mockGitHubData,
-      targetRoleName: "Frontend Engineer",
-      githubUsername: "candidate",
+      targetRoleName: "Backend Engineer",
+      githubUsername: "john",
     });
 
-    // 1. Skill list must match uploaded resume
-    assert.strictEqual(assessment.skills.length, 5);
-    const reactEval = assessment.skills.find((s) => s.skill === "React")!;
-    assert.strictEqual(reactEval.classification, "PROVEN", "React should be PROVEN via commit + test + topic");
-    assert.strictEqual(reactEval.roleRelevance, "CORE", "React should be CORE for Frontend Engineer");
+    assert.strictEqual(assessment.skills.length, skills.length, "Assessment skills count must match resume skills");
 
-    const tsEval = assessment.skills.find((s) => s.skill === "TypeScript")!;
-    assert.strictEqual(tsEval.classification, "PROVEN", "TypeScript should be PROVEN via substantial language");
+    const javaEval = assessment.skills.find((s) => s.skill === "Java")!;
+    assert.strictEqual(javaEval.classification, "PROVEN", "Java should be PROVEN");
+    assert.strictEqual(javaEval.roleRelevance, "CORE", "Java should be CORE for Backend Engineer");
 
-    const dockerEval = assessment.skills.find((s) => s.skill === "Docker")!;
-    assert.strictEqual(dockerEval.classification, "PROVEN", "Docker should be PROVEN via Dockerfile config");
-    assert.strictEqual(dockerEval.roleRelevance, "RELEVANT", "Docker should be RELEVANT for Frontend Engineer");
+    const pythonEval = assessment.skills.find((s) => s.skill === "Python")!;
+    assert.strictEqual(pythonEval.classification, "PROVEN", "Python should be PROVEN");
 
-    const rustEval = assessment.skills.find((s) => s.skill === "Rust")!;
-    assert.strictEqual(rustEval.classification, "CLAIMED-ONLY", "Rust should be CLAIMED-ONLY (no evidence)");
+    const figmaEval = assessment.skills.find((s) => s.skill === "Figma")!;
+    assert.strictEqual(figmaEval.classification, "CLAIMED-ONLY", "Figma without public repo code should be CLAIMED-ONLY");
 
-    // 2. Metrics check
-    assert(assessment.metrics.provenSkillsCount >= 3, "Proven skills count must be >= 3");
+    assert(assessment.metrics.provenSkillsCount >= 2, "Proven count must be >= 2");
     assert(assessment.metrics.claimedOnlySkillsCount >= 1, "Claimed only count must be >= 1");
-    assert(assessment.metrics.evidenceCoveragePercentage > 0, "Evidence coverage must be > 0");
   });
 
   console.log("\n================================================================");

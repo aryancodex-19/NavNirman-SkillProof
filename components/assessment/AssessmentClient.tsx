@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition, useCallback } from "react";
+import React, { useState, useTransition, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import {
@@ -38,6 +38,97 @@ import {
   RoleRelevance,
 } from "@/lib/assessment/engine";
 
+/**
+ * Normalizes an incoming raw or legacy assessment object to guarantee all required
+ * classification fields, role metadata, and numeric metrics exist and are non-undefined.
+ */
+function normalizeAssessmentData(data: any): AssessmentResult | null {
+  if (!data || !Array.isArray(data.skills)) return null;
+
+  const skills: SkillEvidenceAssessment[] = data.skills.map((s: any) => {
+    const rawClass = typeof s.classification === "string" ? s.classification.toUpperCase() : "";
+    let classification: SkillClassification = "CLAIMED-ONLY";
+    if (rawClass === "PROVEN" || rawClass === "PARTIAL" || rawClass === "CLAIMED-ONLY") {
+      classification = rawClass as SkillClassification;
+    } else if (s.hasPublicEvidence) {
+      classification = "PROVEN";
+    }
+
+    const rawRelevance = typeof s.roleRelevance === "string" ? s.roleRelevance.toUpperCase() : "";
+    let roleRelevance: RoleRelevance = "NOT_REQUIRED";
+    if (rawRelevance === "CORE" || rawRelevance === "RELEVANT" || rawRelevance === "NOT_REQUIRED") {
+      roleRelevance = rawRelevance as RoleRelevance;
+    } else if (s.isRoleRelevant) {
+      roleRelevance = "CORE";
+    }
+
+    const citations = Array.isArray(s.citations) ? s.citations : [];
+
+    return {
+      skill: s.skill || "",
+      classification,
+      roleRelevance,
+      isRoleRelevant: roleRelevance !== "NOT_REQUIRED",
+      hasPublicEvidence: classification !== "CLAIMED-ONLY",
+      evidenceCount: typeof s.evidenceCount === "number" ? s.evidenceCount : citations.length,
+      explanation:
+        s.explanation ||
+        (classification === "PROVEN"
+          ? "Verified through direct code artifacts in public repositories."
+          : classification === "PARTIAL"
+          ? "Preliminary evidence observed in public repositories."
+          : "Claimed on resume without public repository evidence."),
+      nextStep: s.nextStep || "",
+      citations,
+      summary: s.summary || s.explanation || "",
+    };
+  });
+
+  const provenSkillsCount = skills.filter((s) => s.classification === "PROVEN").length;
+  const partialSkillsCount = skills.filter((s) => s.classification === "PARTIAL").length;
+  const claimedOnlySkillsCount = skills.filter((s) => s.classification === "CLAIMED-ONLY").length;
+  const totalClaimedSkills = skills.length;
+  const roleRelevantSkillsClaimed = skills.filter((s) => s.roleRelevance === "CORE" || s.isRoleRelevant).length;
+  const roleRelevantSkillsWithEvidence = skills.filter(
+    (s) => (s.roleRelevance === "CORE" || s.isRoleRelevant) && s.classification !== "CLAIMED-ONLY"
+  ).length;
+  const evidenceCoveragePercentage =
+    totalClaimedSkills > 0 ? Math.round(((provenSkillsCount + partialSkillsCount) / totalClaimedSkills) * 100) : 0;
+
+  return {
+    ...data,
+    metrics: {
+      totalClaimedSkills,
+      provenSkillsCount,
+      partialSkillsCount,
+      claimedOnlySkillsCount,
+      skillsWithPublicEvidence: provenSkillsCount + partialSkillsCount,
+      skillsWithoutPublicEvidence: claimedOnlySkillsCount,
+      roleRelevantSkillsClaimed,
+      roleRelevantSkillsWithEvidence,
+      evidenceCoveragePercentage,
+      totalInspectedRepos: data.metrics?.totalInspectedRepos ?? 0,
+      totalTestSuites: data.metrics?.totalTestSuites ?? 0,
+      totalCIWorkflows: data.metrics?.totalCIWorkflows ?? 0,
+      totalDeploymentConfigs: data.metrics?.totalDeploymentConfigs ?? 0,
+      totalVerifiedCommits: data.metrics?.totalVerifiedCommits ?? 0,
+    },
+    skills,
+    roleInsights: {
+      observedStrengths: Array.isArray(data.roleInsights?.observedStrengths)
+        ? data.roleInsights.observedStrengths
+        : [],
+      evidenceOpportunities: Array.isArray(data.roleInsights?.evidenceOpportunities)
+        ? data.roleInsights.evidenceOpportunities
+        : [],
+      summary: data.roleInsights?.summary || "",
+    },
+    notice:
+      data.notice ||
+      "Assessment is strictly limited to verifiable public repository artifacts and does not claim to evaluate private codebases or unshared repositories.",
+  };
+}
+
 interface AssessmentClientProps {
   initialResume: {
     id: string;
@@ -69,11 +160,20 @@ export default function AssessmentClient({
   const [isUploadingResume, setIsUploadingResume] = useState(false);
   const [isAssessing, startAssessing] = useTransition();
 
-  // Results & active views
-  const [assessment, setAssessment] = useState<AssessmentResult | null>(initialAssessment);
+  // Results & active views (normalized to prevent undefined values or stale schemas)
+  const [assessment, setAssessment] = useState<AssessmentResult | null>(() =>
+    normalizeAssessmentData(initialAssessment)
+  );
   const [activeFilter, setActiveFilter] = useState<"all" | "proven" | "partial" | "claimed-only" | "role-core">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSkill, setExpandedSkill] = useState<string | null>(null);
+
+  // Sync if initialAssessment prop changes
+  useEffect(() => {
+    if (initialAssessment) {
+      setAssessment(normalizeAssessmentData(initialAssessment));
+    }
+  }, [initialAssessment]);
 
   // Resume File Upload handler
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -165,7 +265,7 @@ export default function AssessmentClient({
         }
 
         const data: AssessmentResult = await res.json();
-        setAssessment(data);
+        setAssessment(normalizeAssessmentData(data));
         toast.success("Skill classification assessment completed!");
       } catch (err: any) {
         console.error("Assessment error:", err);
@@ -174,17 +274,33 @@ export default function AssessmentClient({
     });
   };
 
-  // Filter skills in report view
-  const filteredSkills = (assessment?.skills || []).filter((s) => {
-    const matchesSearch = s.skill.toLowerCase().includes(searchQuery.toLowerCase());
-    if (!matchesSearch) return false;
+  // Dynamically calculate accurate counts based on current skills array
+  const filterCounts = useMemo(() => {
+    const skills = assessment?.skills || [];
+    return {
+      all: skills.length,
+      proven: skills.filter((s) => s.classification === "PROVEN").length,
+      partial: skills.filter((s) => s.classification === "PARTIAL").length,
+      claimedOnly: skills.filter((s) => s.classification === "CLAIMED-ONLY").length,
+      roleCore: skills.filter((s) => s.roleRelevance === "CORE" || s.isRoleRelevant).length,
+    };
+  }, [assessment]);
 
-    if (activeFilter === "proven") return s.classification === "PROVEN";
-    if (activeFilter === "partial") return s.classification === "PARTIAL";
-    if (activeFilter === "claimed-only") return s.classification === "CLAIMED-ONLY";
-    if (activeFilter === "role-core") return s.roleRelevance === "CORE" || s.isRoleRelevant;
-    return true;
-  });
+  // Filter skills in report view
+  const filteredSkills = useMemo(() => {
+    if (!assessment?.skills) return [];
+    return assessment.skills.filter((s) => {
+      const matchesSearch = s.skill.toLowerCase().includes(searchQuery.toLowerCase().trim());
+      if (!matchesSearch) return false;
+
+      const c = (s.classification || "").toUpperCase();
+      if (activeFilter === "proven") return c === "PROVEN";
+      if (activeFilter === "partial") return c === "PARTIAL";
+      if (activeFilter === "claimed-only") return c === "CLAIMED-ONLY";
+      if (activeFilter === "role-core") return s.roleRelevance === "CORE" || s.isRoleRelevant;
+      return true;
+    });
+  }, [assessment, activeFilter, searchQuery]);
 
   const getCitationIcon = (type: EvidenceCitation["type"]) => {
     switch (type) {
@@ -617,24 +733,37 @@ export default function AssessmentClient({
             {/* Filter Pills */}
             <div className="flex items-center gap-2 flex-wrap border-b border-white/5 pb-4">
               {[
-                { id: "all", label: `All (${assessment.skills.length})` },
-                { id: "proven", label: `PROVEN (${assessment.metrics.provenSkillsCount})` },
-                { id: "partial", label: `PARTIAL (${assessment.metrics.partialSkillsCount})` },
-                { id: "claimed-only", label: `CLAIMED-ONLY (${assessment.metrics.claimedOnlySkillsCount})` },
-                { id: "role-core", label: `Role Core (${assessment.metrics.roleRelevantSkillsClaimed})` },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveFilter(tab.id as any)}
-                  className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
-                    activeFilter === tab.id
-                      ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
-                      : "bg-white/[0.02] text-muted-foreground hover:text-white border border-white/5"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+                { id: "all", label: "All", count: filterCounts.all },
+                { id: "proven", label: "PROVEN", count: filterCounts.proven },
+                { id: "partial", label: "PARTIAL", count: filterCounts.partial },
+                { id: "claimed-only", label: "CLAIMED-ONLY", count: filterCounts.claimedOnly },
+                { id: "role-core", label: "Role Core", count: filterCounts.roleCore },
+              ].map((tab) => {
+                const isActive = activeFilter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveFilter(tab.id as any)}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-2 select-none ${
+                      isActive
+                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shadow-sm shadow-indigo-500/10"
+                        : "bg-white/[0.02] text-muted-foreground hover:text-white border border-white/5 hover:border-white/10"
+                    }`}
+                  >
+                    <span>{tab.label}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono font-bold ${
+                        isActive
+                          ? "bg-indigo-500/40 text-indigo-100"
+                          : "bg-white/5 text-muted-foreground"
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Skills Grid */}
