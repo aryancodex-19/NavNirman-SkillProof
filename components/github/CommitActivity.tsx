@@ -22,11 +22,11 @@ interface CommitActivityProps {
 
 const HEATMAP_COLORS = [
   "bg-white/[0.03]",
-  "bg-indigo-500/20",
-  "bg-indigo-500/40",
-  "bg-indigo-500/60",
-  "bg-indigo-500/80",
-  "bg-indigo-500",
+  "bg-purple-500/20",
+  "bg-purple-500/40",
+  "bg-purple-500/60",
+  "bg-purple-500/80",
+  "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]",
 ];
 
 function getHeatmapColor(count: number): string {
@@ -55,7 +55,7 @@ export default function CommitActivity({ data }: CommitActivityProps) {
     if (firstDate) {
       const dayOfWeek = new Date(firstDate).getDay();
       for (let i = 0; i < dayOfWeek; i++) {
-        currentWeek.push({ date: "", count: -1 }); // -1 = empty cell
+        currentWeek.push({ date: "", count: -1 });
       }
     }
 
@@ -78,24 +78,24 @@ export default function CommitActivity({ data }: CommitActivityProps) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] backdrop-blur-xl p-6"
+      className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_8px_32px_rgba(139,92,246,0.12)]"
     >
-      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-400/20 to-transparent pointer-events-none" />
 
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-            <GitBranch className="w-5 h-5 text-indigo-400" />
+          <div className="p-2.5 bg-purple-500/10 rounded-xl border border-purple-500/20 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+            <GitBranch className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base font-bold text-white">Commit Activity</h3>
-            <p className="text-[11px] text-gray-500 mt-0.5">
+            <p className="text-[11px] text-gray-400 mt-0.5">
               Last 365 days of contribution data
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.03] rounded-lg border border-white/5">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
           <TrendIcon trend={data.trend} />
           <span className="text-xs font-semibold text-gray-300 capitalize">
             {data.trend}
@@ -114,19 +114,19 @@ export default function CommitActivity({ data }: CommitActivityProps) {
             key={label}
             className="bg-white/[0.02] border border-white/5 rounded-xl p-3 text-center"
           >
-            <Icon className="w-3.5 h-3.5 text-indigo-400 mx-auto mb-1.5" />
+            <Icon className="w-3.5 h-3.5 text-purple-400 mx-auto mb-1.5" />
             <p className="text-lg font-black text-white">{value}</p>
-            <p className="text-[10px] text-gray-500 font-medium mt-0.5">{label}</p>
+            <p className="text-[10px] text-gray-400 font-medium mt-0.5">{label}</p>
           </div>
         ))}
       </div>
 
       {/* Contribution Heatmap */}
       <div className="space-y-2">
-        <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">
+        <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">
           Contribution Heatmap
         </p>
-        <div className="overflow-x-auto pb-2">
+        <div className="overflow-x-auto pb-2 scrollbar-none">
           <div className="flex gap-[3px] min-w-[680px]">
             {heatmapGrid.map((week, wi) => (
               <div key={wi} className="flex flex-col gap-[3px]">
@@ -136,7 +136,7 @@ export default function CommitActivity({ data }: CommitActivityProps) {
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{
-                      delay: wi * 0.008 + di * 0.01,
+                      delay: wi * 0.006 + di * 0.008,
                       duration: 0.2,
                     }}
                     title={
@@ -156,27 +156,27 @@ export default function CommitActivity({ data }: CommitActivityProps) {
 
         {/* Legend */}
         <div className="flex items-center justify-end gap-1.5 pt-1">
-          <span className="text-[10px] text-gray-600 mr-1">Less</span>
+          <span className="text-[10px] text-gray-500 mr-1">Less</span>
           {HEATMAP_COLORS.map((color, i) => (
             <div key={i} className={`w-[10px] h-[10px] rounded-[2px] ${color}`} />
           ))}
-          <span className="text-[10px] text-gray-600 ml-1">More</span>
+          <span className="text-[10px] text-gray-500 ml-1">More</span>
         </div>
       </div>
 
       {/* Score Indicator */}
       <div className="mt-5 flex items-center justify-between px-1">
-        <span className="text-xs text-gray-500 font-medium">Activity Score</span>
+        <span className="text-xs text-gray-400 font-medium">Activity Score</span>
         <div className="flex items-center gap-2">
-          <div className="w-32 h-2 bg-white/5 rounded-full overflow-hidden">
+          <div className="w-32 h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${data.score}%` }}
               transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-              className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full"
+              className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.4)]"
             />
           </div>
-          <span className="text-sm font-bold text-indigo-400">{data.score}</span>
+          <span className="text-sm font-bold text-purple-400">{data.score}</span>
         </div>
       </div>
     </motion.div>

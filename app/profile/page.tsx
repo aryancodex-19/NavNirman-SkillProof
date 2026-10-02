@@ -50,15 +50,17 @@ export default async function ProfilePage() {
         <PageTransition>
           <main className="max-w-4xl mx-auto py-10 px-6 space-y-8">
             {/* Premium Header */}
-            <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-indigo-950/40 via-purple-950/20 to-zinc-950/60 p-7 text-white shadow-2xl backdrop-blur-md animate-fade-in">
-              <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-indigo-500/10 blur-3xl" />
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-7 text-white shadow-[0_8px_32px_rgba(139,92,246,0.15)] animate-fade-in">
+              <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-purple-500/15 blur-3xl" />
               <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-6">
                 <div className="p-4 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 shrink-0">
-                  <UserCircle2 className="w-8 h-8 text-indigo-400" />
+                  <UserCircle2 className="w-8 h-8 text-purple-300 drop-shadow-[0_0_10px_rgba(168,85,247,0.7)]" />
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">My Professional Profile</h1>
-                  <p className="text-gray-300 text-sm mt-1 leading-relaxed">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight gradient-text">
+                    My Professional Profile
+                  </h1>
+                  <p className="text-gray-400 text-sm mt-1 leading-relaxed">
                     Keep your details updated to customize your AI-powered career tools, portfolios, and mock interviews.
                   </p>
                 </div>

@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import {
   Mic,
-  MicOff,
   Square,
   Play,
   ChevronRight,
@@ -203,7 +202,6 @@ export default function VoiceInterview({ targetRole = "Software Engineer", skill
   const [textInput, setTextInput] = useState("");
 
   // Refs
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -596,23 +594,23 @@ export default function VoiceInterview({ targetRole = "Software Engineer", skill
         className="max-w-2xl mx-auto"
       >
         {/* Hero card */}
-        <div className="relative overflow-hidden bg-card border border-border rounded-2xl p-8 sm:p-10 text-center shadow-xl">
+        <div className="relative overflow-hidden bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-8 sm:p-10 text-center shadow-[0_8px_32px_rgba(139,92,246,0.15)]">
           {/* BG glow */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary/8 rounded-full blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-accent/8 rounded-full blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-transparent to-indigo-600/5 pointer-events-none" />
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10 space-y-6">
             {/* Icon */}
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 border border-primary/20 rounded-2xl mx-auto">
-              <Mic className="w-10 h-10 text-primary" />
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl mx-auto shadow-[0_0_30px_rgba(139,92,246,0.4)]">
+              <Mic className="w-10 h-10 text-white animate-pulse" />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-2xl font-extrabold text-foreground">
+              <h2 className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-300">
                 AI Voice Mock Interview
               </h2>
-              <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
+              <p className="text-gray-400 text-sm max-w-md mx-auto leading-relaxed">
                 A real interviewer experience powered by Groq AI. It adapts to your answers, asks follow-up questions, and evaluates your performance in real time.
               </p>
             </div>
@@ -627,20 +625,20 @@ export default function VoiceInterview({ targetRole = "Software Engineer", skill
               ].map(({ icon: Icon, label }) => (
                 <div
                   key={label}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 border border-border rounded-full text-xs text-muted-foreground font-medium"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs text-gray-300 font-medium"
                 >
-                  <Icon className="w-3 h-3 text-primary" />
+                  <Icon className="w-3.5 h-3.5 text-purple-400" />
                   {label}
                 </div>
               ))}
             </div>
 
             {/* Target role display */}
-            <div className="bg-muted/50 border border-border rounded-xl p-4 text-left space-y-1.5">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-left space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Interview For</span>
+                <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Interview For</span>
               </div>
-              <p className="text-foreground font-bold">{targetRole}</p>
+              <p className="text-white font-bold">{targetRole}</p>
               {skills && (
                 <div className="flex flex-wrap gap-1 pt-1">
                   {(typeof skills === "string" ? skills.split(",") : (skills as string[]))
@@ -648,7 +646,7 @@ export default function VoiceInterview({ targetRole = "Software Engineer", skill
                     .map((s: string) => (
                       <span
                         key={s}
-                        className="px-2 py-0.5 text-[10px] bg-primary/10 text-primary rounded-md border border-primary/20 font-medium"
+                        className="px-2 py-0.5 text-[10px] bg-purple-500/10 text-purple-300 rounded-md border border-purple-500/20 font-medium"
                       >
                         {s.trim()}
                       </span>
@@ -658,16 +656,16 @@ export default function VoiceInterview({ targetRole = "Software Engineer", skill
             </div>
 
             {/* Mode toggle */}
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
               <button
                 onClick={() => setTextMode(false)}
-                className={`px-3 py-1.5 rounded-lg border transition-all font-medium ${!textMode ? "bg-primary/10 text-primary border-primary/30" : "border-border hover:border-primary/20"}`}
+                className={`px-3 py-1.5 rounded-lg border transition-all font-medium ${!textMode ? "bg-purple-600/20 text-purple-300 border-purple-500/40 shadow-[0_0_15px_rgba(139,92,246,0.3)]" : "border-white/10 hover:border-purple-500/30 text-gray-400 hover:text-white"}`}
               >
                 🎤 Voice Mode
               </button>
               <button
                 onClick={() => setTextMode(true)}
-                className={`px-3 py-1.5 rounded-lg border transition-all font-medium ${textMode ? "bg-primary/10 text-primary border-primary/30" : "border-border hover:border-primary/20"}`}
+                className={`px-3 py-1.5 rounded-lg border transition-all font-medium ${textMode ? "bg-purple-600/20 text-purple-300 border-purple-500/40 shadow-[0_0_15px_rgba(139,92,246,0.3)]" : "border-white/10 hover:border-purple-500/30 text-gray-400 hover:text-white"}`}
               >
                 ⌨️ Text Mode
               </button>
@@ -675,15 +673,15 @@ export default function VoiceInterview({ targetRole = "Software Engineer", skill
 
             <motion.button
               onClick={startInterview}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              className="w-full py-4 gradient-bg text-white font-bold text-lg rounded-xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:shadow-primary/30 transition-all"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-base rounded-xl shadow-[0_0_25px_rgba(139,92,246,0.4)] hover:shadow-[0_0_35px_rgba(139,92,246,0.6)] flex items-center justify-center gap-2 transition-all shimmer"
             >
-              <Play className="w-5 h-5" />
+              <Play className="w-5 h-5 fill-white" />
               Start Interview
             </motion.button>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500">
               {textMode
                 ? "Text mode: Type your answers instead of speaking."
                 : "Voice mode: Allow microphone access when prompted."}

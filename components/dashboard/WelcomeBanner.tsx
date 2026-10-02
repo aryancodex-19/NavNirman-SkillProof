@@ -19,38 +19,46 @@ export default function WelcomeBanner({ displayName, targetRole }: WelcomeBanner
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <GlassCard hoverEffect={false} glowColor="indigo" className="p-8 sm:p-10 text-white relative bg-gradient-to-br from-indigo-950/20 via-zinc-950/40 to-purple-950/10">
-        <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-indigo-500/10 blur-[80px]" />
-        <div className="absolute -bottom-12 -left-12 h-48 w-48 rounded-full bg-pink-500/5 blur-[80px]" />
+      <GlassCard
+        hoverEffect={false}
+        glowColor="purple"
+        className="p-8 sm:p-10 text-white relative bg-gradient-to-br from-purple-950/25 via-black/50 to-indigo-950/20 border-white/10 shadow-[0_8px_32px_rgba(139,92,246,0.18)]"
+      >
+        <div className="absolute -right-12 -top-12 h-52 w-52 rounded-full bg-purple-600/10 blur-[80px] pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 h-52 w-52 rounded-full bg-indigo-600/10 blur-[80px] pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-8">
           <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-              <Sparkles className="h-4 w-4" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.2)]">
+              <Sparkles className="h-3.5 w-3.5 text-purple-400" />
               <span className="text-[10px] font-bold uppercase tracking-wider">
-                Active Member
+                SkillProof Member
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
-              Welcome back, <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">{displayName}</span>!
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+              Welcome back,{" "}
+              <span className="bg-gradient-to-r from-purple-400 via-violet-300 to-indigo-300 bg-clip-text text-transparent">
+                {displayName}
+              </span>
+              !
             </h1>
 
             <p className="text-gray-300 text-sm max-w-xl leading-relaxed">
-              Your AI-powered workspace is ready. Tailor resumes, practice voice mocks, track coding milestones, and find internships all in one unified dashboard.
+              Your AI career workspace is ready. Tailor resumes, practice voice mocks, track coding milestones, and find internships all in one unified dashboard.
             </p>
 
             {targetRole ? (
               <div className="flex items-center gap-2.5 pt-1">
                 <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Target Role:</span>
-                <span className="bg-white/5 border border-white/10 text-indigo-300 px-3 py-1 rounded-lg text-xs font-bold">
+                <span className="bg-purple-500/15 border border-purple-500/30 text-purple-200 px-3 py-1 rounded-lg text-xs font-bold shadow-[0_0_10px_rgba(168,85,247,0.15)]">
                   {targetRole}
                 </span>
               </div>
             ) : (
               <Link
                 href="/profile"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors pt-1"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-400 hover:text-purple-300 transition-colors pt-1"
               >
                 Complete profile configuration
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -61,12 +69,12 @@ export default function WelcomeBanner({ displayName, targetRole }: WelcomeBanner
           {/* Quick Action buttons */}
           <div className="flex flex-col sm:flex-row md:flex-col gap-3 shrink-0">
             <Link href="/profile" passHref>
-              <AnimatedButton variant="glass" className="w-full sm:w-auto text-center justify-center border-white/5 bg-white/[0.02]">
+              <AnimatedButton variant="secondary" className="w-full sm:w-auto text-center justify-center">
                 Configure Profile
               </AnimatedButton>
             </Link>
             <Link href="/dashboard/resume" passHref>
-              <AnimatedButton variant="primary" className="w-full sm:w-auto text-center justify-center shadow-lg shadow-indigo-500/10">
+              <AnimatedButton variant="primary" className="w-full sm:w-auto text-center justify-center">
                 Build AI Resume
               </AnimatedButton>
             </Link>

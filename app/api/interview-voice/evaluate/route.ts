@@ -13,7 +13,6 @@ export async function POST(req: NextRequest) {
     const {
       question,
       answer,
-      questionNumber,
       targetRole,
       skills,
       questionType = "technical",

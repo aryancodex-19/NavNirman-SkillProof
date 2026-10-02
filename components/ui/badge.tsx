@@ -1,30 +1,37 @@
 import * as React from "react";
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: "default" | "secondary" | "destructive" | "outline" | "success";
+  variant?: "default" | "secondary" | "destructive" | "outline" | "success" | "purple";
 }
 
-export function Badge({ className, variant = "default", ...props }: BadgeProps) {
-  let baseStyles =
-    "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2";
+export function Badge({ className = "", variant = "default", ...props }: BadgeProps) {
+  const baseStyles =
+    "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500/50";
   let variantStyles = "";
 
   switch (variant) {
     case "default":
-      variantStyles = "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80";
+      variantStyles =
+        "border border-purple-500/30 bg-purple-500/10 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.2)]";
+      break;
+    case "purple":
+      variantStyles =
+        "border border-purple-400/40 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.25)]";
       break;
     case "secondary":
-      variantStyles = "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80";
+      variantStyles =
+        "border border-white/10 bg-white/5 backdrop-blur-md text-gray-300 hover:bg-white/10";
       break;
     case "destructive":
       variantStyles =
-        "border-transparent bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20";
+        "border border-red-500/30 bg-red-500/10 text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.2)]";
       break;
     case "success":
-      variantStyles = "border-transparent bg-success/10 text-success border-success/20 hover:bg-success/20";
+      variantStyles =
+        "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.2)]";
       break;
     case "outline":
-      variantStyles = "text-foreground border-border";
+      variantStyles = "text-gray-300 border border-white/15 bg-transparent";
       break;
   }
 

@@ -42,14 +42,14 @@ function MetricBar({ label, icon: Icon, percentage, color, delay }: MetricBarPro
         </div>
         <span className="text-xs font-bold text-gray-400">{percentage}%</span>
       </div>
-      <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
+      <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 1, ease: "easeOut", delay }}
-          className="h-full rounded-full"
+          className="h-full rounded-full shadow-[0_0_8px_rgba(168,85,247,0.4)]"
           style={{
-            background: `linear-gradient(90deg, ${color.includes("emerald") ? "#10b981" : color.includes("indigo") ? "#6366f1" : color.includes("amber") ? "#f59e0b" : "#ec4899"}, ${color.includes("emerald") ? "#34d399" : color.includes("indigo") ? "#818cf8" : color.includes("amber") ? "#fbbf24" : "#f472b6"})`,
+            background: `linear-gradient(90deg, ${color.includes("emerald") ? "#10b981" : color.includes("purple") ? "#a855f7" : color.includes("indigo") ? "#6366f1" : color.includes("amber") ? "#f59e0b" : "#c084fc"}, ${color.includes("emerald") ? "#34d399" : color.includes("purple") ? "#c084fc" : color.includes("indigo") ? "#818cf8" : color.includes("amber") ? "#fbbf24" : "#e879f9"})`,
           }}
         />
       </div>
@@ -69,19 +69,19 @@ export default function DocQuality({ data }: DocQualityProps) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.25 }}
-      className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] backdrop-blur-xl p-6"
+      className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-6 shadow-[0_8px_32px_rgba(139,92,246,0.12)]"
     >
-      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-purple-400/20 to-transparent pointer-events-none" />
 
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-            <FileText className="w-5 h-5 text-emerald-400" />
+          <div className="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+            <FileText className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base font-bold text-white">Documentation Quality</h3>
-            <p className="text-[11px] text-gray-500 mt-0.5">
+            <p className="text-[11px] text-gray-400 mt-0.5">
               Analyzed {data.totalChecked} repositories
             </p>
           </div>
@@ -101,7 +101,7 @@ export default function DocQuality({ data }: DocQualityProps) {
           label="License Presence"
           icon={Scale}
           percentage={data.licensePercentage}
-          color="text-indigo-400"
+          color="text-purple-400"
           delay={0.4}
         />
         <MetricBar
@@ -123,7 +123,7 @@ export default function DocQuality({ data }: DocQualityProps) {
       {/* Repo Details */}
       {data.repoDetails.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">
+          <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider">
             Per-Repository Scores
           </p>
           <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1 scrollbar-none">
@@ -136,7 +136,7 @@ export default function DocQuality({ data }: DocQualityProps) {
                 className="flex items-center justify-between bg-white/[0.02] border border-white/5 rounded-xl px-3 py-2"
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <span className="text-xs font-semibold text-gray-300 truncate">
+                  <span className="text-xs font-semibold text-gray-200 truncate">
                     {repo.name}
                   </span>
                 </div>
@@ -170,13 +170,13 @@ export default function DocQuality({ data }: DocQualityProps) {
           </div>
           {/* Legend */}
           <div className="flex items-center gap-3 pt-1 px-1">
-            <span className="text-[9px] text-gray-600 flex items-center gap-1">
+            <span className="text-[9px] text-gray-500 flex items-center gap-1">
               <CheckCircle2 className="w-2.5 h-2.5" /> README
             </span>
-            <span className="text-[9px] text-gray-600 flex items-center gap-1">
+            <span className="text-[9px] text-gray-500 flex items-center gap-1">
               <CheckCircle2 className="w-2.5 h-2.5" /> License
             </span>
-            <span className="text-[9px] text-gray-600 flex items-center gap-1">
+            <span className="text-[9px] text-gray-500 flex items-center gap-1">
               <CheckCircle2 className="w-2.5 h-2.5" /> Setup
             </span>
           </div>
@@ -185,16 +185,16 @@ export default function DocQuality({ data }: DocQualityProps) {
 
       {/* Score Indicator */}
       <div className="mt-5 flex items-center justify-between px-1">
-        <span className="text-xs text-gray-500 font-medium">
+        <span className="text-xs text-gray-400 font-medium">
           Documentation Score
         </span>
         <div className="flex items-center gap-2">
-          <div className="w-32 h-2 bg-white/5 rounded-full overflow-hidden">
+          <div className="w-32 h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${data.score}%` }}
               transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
-              className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
+              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.4)]"
             />
           </div>
           <span className="text-sm font-bold text-emerald-400">

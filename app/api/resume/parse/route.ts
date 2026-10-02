@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
         .replace(/```\s*/g, "")
         .trim();
       parsedData = JSON.parse(cleaned);
-    } catch (parseErr) {
+    } catch {
       console.error("Failed to parse Gemini response as JSON:", rawResponse.substring(0, 500));
       return NextResponse.json(
         { error: "AI returned invalid JSON. Please try again." },

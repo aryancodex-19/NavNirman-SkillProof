@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Search, Filter, Loader2, RefreshCw, MapPin, Wifi, WifiOff } from "lucide-react";
+import { Search, Filter, RefreshCw } from "lucide-react";
 import JobCard from "./JobCard";
 import { Button } from "@/components/ui/button";
 
@@ -125,33 +125,33 @@ export default function InternshipFinder({ userSkills, userRole }: InternshipFin
   return (
     <div className="space-y-6">
       {/* Search & Filters */}
-      <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+      <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-6 space-y-5 shadow-[0_8px_32px_rgba(139,92,246,0.12)]">
         {/* Search bar */}
         <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
             placeholder="Search by role, company, or skill..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+            className="w-full pl-11 pr-4 py-3.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 focus:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-all"
           />
         </div>
 
         {/* Filter Row */}
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className="text-xs font-semibold text-muted-foreground">Location:</span>
-            <div className="flex gap-1">
+            <Filter className="w-3.5 h-3.5 text-purple-400" />
+            <span className="text-xs font-semibold text-gray-300">Location:</span>
+            <div className="flex gap-1.5">
               {LOCATION_TYPES.map(type => (
                 <button
                   key={type}
                   onClick={() => setLocationType(type)}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all ${
+                  className={`px-3 py-1 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
                     locationType === type
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-muted text-muted-foreground border-border hover:border-primary/30"
+                      ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-400/40 shadow-[0_0_12px_rgba(168,85,247,0.3)]"
+                      : "bg-white/5 text-gray-400 border-white/10 hover:border-purple-500/30 hover:text-white"
                   }`}
                 >
                   {type}
@@ -167,10 +167,10 @@ export default function InternshipFinder({ userSkills, userRole }: InternshipFin
             <button
               key={role}
               onClick={() => setRoleFilter(role)}
-              className={`px-3 py-1 text-xs font-semibold rounded-full border transition-all ${
+              className={`px-3 py-1 text-xs font-semibold rounded-full border transition-all cursor-pointer ${
                 roleFilter === role
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-muted text-muted-foreground border-border hover:border-primary/30 hover:text-primary"
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-400/40 shadow-[0_0_12px_rgba(168,85,247,0.3)]"
+                  : "bg-white/5 text-gray-400 border-white/10 hover:border-purple-500/30 hover:text-white"
               }`}
             >
               {role}
@@ -179,17 +179,17 @@ export default function InternshipFinder({ userSkills, userRole }: InternshipFin
         </div>
 
         {/* Stats & Sort */}
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">
-            Showing <span className="text-foreground font-bold">{filteredJobs.length}</span> internships
-            {savedJobs.size > 0 && <span> · <span className="text-primary font-bold">{savedJobs.size}</span> saved</span>}
+        <div className="flex items-center justify-between pt-3 border-t border-white/5">
+          <p className="text-xs text-gray-400">
+            Showing <span className="text-white font-bold">{filteredJobs.length}</span> internships
+            {savedJobs.size > 0 && <span> · <span className="text-purple-400 font-bold">{savedJobs.size}</span> saved in wishlist</span>}
           </p>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Sort:</span>
+            <span className="text-xs text-gray-400">Sort:</span>
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as "match" | "stipend")}
-              className="text-xs bg-muted border border-border rounded-lg px-2 py-1 text-foreground focus:outline-none focus:border-primary"
+              className="text-xs bg-[#101018] border border-white/10 rounded-lg px-2.5 py-1.5 text-white focus:outline-none focus:border-purple-500"
             >
               <option value="match">Best Match</option>
               <option value="stipend">Stipend</option>
@@ -197,7 +197,7 @@ export default function InternshipFinder({ userSkills, userRole }: InternshipFin
             <button
               onClick={fetchJobs}
               disabled={loading}
-              className="p-1.5 bg-muted border border-border rounded-lg text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
+              className="p-1.5 bg-white/5 border border-white/10 rounded-lg text-gray-400 hover:text-white hover:border-purple-500/30 transition-all cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
             </button>
@@ -209,16 +209,16 @@ export default function InternshipFinder({ userSkills, userRole }: InternshipFin
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {Array(8).fill(0).map((_, i) => (
-            <div key={i} className="h-72 rounded-2xl skeleton" />
+            <div key={i} className="h-72 rounded-2xl bg-white/[0.02] border border-white/5 animate-pulse" />
           ))}
         </div>
       ) : filteredJobs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mb-4">
-            <Search className="w-8 h-8 text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center py-20 text-center bg-white/[0.02] border border-white/10 rounded-2xl p-8">
+          <div className="w-16 h-16 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center justify-center mb-4 text-purple-400">
+            <Search className="w-8 h-8" />
           </div>
-          <h3 className="font-bold text-foreground mb-2">No internships found</h3>
-          <p className="text-sm text-muted-foreground mb-4">Try adjusting your filters or search query</p>
+          <h3 className="font-bold text-white text-base mb-2">No internships found</h3>
+          <p className="text-xs text-gray-400 mb-4 max-w-sm">Try adjusting your filters or search query to see more open roles.</p>
           <Button variant="outline" onClick={() => { setSearchQuery(""); setLocationType("Any"); setRoleFilter("Any"); }}>
             Clear Filters
           </Button>

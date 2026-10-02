@@ -18,16 +18,16 @@ function DashboardHeader() {
   }, [theme, setTheme]);
 
   return (
-    <header className="h-16 border-b border-white/5 bg-zinc-950/40 backdrop-blur-xl sticky top-0 z-30">
+    <header className="h-16 border-b border-white/10 bg-black/40 backdrop-blur-xl sticky top-0 z-30 shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
       <div className="flex items-center justify-between h-full px-6 lg:px-8">
-        {/* Left spacer for mobile hamburgers */}
+        {/* Left spacer for mobile hamburger */}
         <div className="lg:hidden w-12" />
 
         {/* Workspace Active Indicator */}
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-          <ShieldCheck className="h-4 w-4" />
+        <div className="hidden lg:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+          <ShieldCheck className="h-4 w-4 text-purple-400" />
           <span className="text-[10px] font-bold uppercase tracking-wider">
-            Premium Workspace Active
+            Verified AI Workspace
           </span>
         </div>
 
@@ -37,7 +37,7 @@ function DashboardHeader() {
           {mounted && (
             <button
               onClick={handleToggleTheme}
-              className="p-2 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/5 text-muted-foreground hover:text-foreground transition-all duration-200 cursor-pointer"
+              className="p-2 rounded-xl hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-all duration-200 cursor-pointer bg-white/[0.02]"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? (
@@ -50,11 +50,11 @@ function DashboardHeader() {
 
           {/* Notifications Button */}
           <button
-            className="p-2 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/5 text-muted-foreground hover:text-foreground transition-all duration-200 relative cursor-pointer"
+            className="p-2 rounded-xl hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-all duration-200 relative cursor-pointer bg-white/[0.02]"
             aria-label="Notifications"
           >
             <Bell className="h-4 w-4" />
-            <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-indigo-500" />
+            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
           </button>
 
           {/* Vertical Separator */}
@@ -64,7 +64,7 @@ function DashboardHeader() {
           <UserButton
             appearance={{
               elements: {
-                avatarBox: "h-7 w-7 border border-white/10 rounded-full",
+                avatarBox: "h-8 w-8 border border-purple-500/30 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.3)]",
               },
             }}
           />

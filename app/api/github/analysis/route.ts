@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db/prisma";
 
@@ -487,7 +486,7 @@ function getScoreLevel(score: number): { label: string; color: string } {
 
 // ─── Route Handler ─────────────────────────────────────────
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const { userId: clerkId } = await auth();
     if (!clerkId) {

@@ -23,11 +23,11 @@ interface MentorChatProps {
 }
 
 const STARTER_PROMPTS = [
-  "Create a 6-month roadmap to become a frontend developer",
-  "What projects should I build to land my first dev job?",
-  "Review my career path and suggest improvements",
-  "What are the best free courses to learn system design?",
-  "How do I prepare for FAANG interviews in 3 months?",
+  "Create a 6-month roadmap to become a Senior Full-Stack Engineer",
+  "What projects should I build to stand out for $100k+ remote roles?",
+  "Review my tech stack and suggest high-leverage skill upgrades",
+  "What are the best free resources to master System Design?",
+  "How do I prepare for FAANG technical interviews in 90 days?",
 ];
 
 export default function MentorChat({ userProfile }: MentorChatProps) {
@@ -148,41 +148,41 @@ export default function MentorChat({ userProfile }: MentorChatProps) {
     return text
       .split("\n")
       .map((line, i) => {
-        line = line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        line = line.replace(/\*\*(.*?)\*\*/g, "<strong class='text-white'>$1</strong>");
         line = line.replace(/\*(.*?)\*/g, "<em>$1</em>");
-        line = line.replace(/`(.*?)`/g, '<code class="bg-muted px-1 py-0.5 rounded text-xs font-mono">$1</code>');
+        line = line.replace(/`(.*?)`/g, '<code class="bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono text-purple-300">$1</code>');
         if (line.startsWith("• ") || line.startsWith("- ")) {
-          return `<div key="${i}" class="flex gap-2 my-0.5"><span class="text-primary mt-1 shrink-0">•</span><span>${line.slice(2)}</span></div>`;
+          return `<div key="${i}" class="flex gap-2 my-1"><span class="text-purple-400 mt-0.5 shrink-0">•</span><span>${line.slice(2)}</span></div>`;
         }
-        if (line.startsWith("## ")) return `<h3 class="text-base font-bold text-foreground mt-3 mb-1">${line.slice(3)}</h3>`;
-        if (line.startsWith("# ")) return `<h2 class="text-lg font-bold text-foreground mt-4 mb-2">${line.slice(2)}</h2>`;
-        if (!line.trim()) return "<div class='my-1'></div>";
-        return `<p>${line}</p>`;
+        if (line.startsWith("## ")) return `<h3 class="text-base font-bold text-white mt-4 mb-1.5">${line.slice(3)}</h3>`;
+        if (line.startsWith("# ")) return `<h2 class="text-lg font-bold text-white mt-5 mb-2">${line.slice(2)}</h2>`;
+        if (!line.trim()) return "<div class='my-1.5'></div>";
+        return `<p class="leading-relaxed">${line}</p>`;
       })
       .join("");
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-220px)] min-h-[600px] bg-card rounded-2xl border border-border shadow-lg overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-220px)] min-h-[600px] bg-white/[0.03] backdrop-blur-xl rounded-2xl border border-white/10 shadow-[0_8px_32px_rgba(139,92,246,0.15)] overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/40 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-xl text-primary">
+          <div className="p-2.5 bg-purple-500/10 border border-purple-500/20 rounded-xl text-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.2)]">
             <BrainCircuit className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-foreground text-sm">AI Career Mentor</h3>
-            <p className="text-xs text-muted-foreground">Powered by Groq Llama 3.3 70B</p>
+            <h3 className="font-bold text-white text-sm">AI Career Strategist</h3>
+            <p className="text-[11px] text-gray-400">Powered by Groq Llama 3.3 70B</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-success/10 rounded-full border border-success/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-            <span className="text-[10px] font-semibold text-success">Online</span>
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
+            <span className="text-[10px] font-bold text-emerald-400">Online</span>
           </div>
           <button
             onClick={clearChat}
-            className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all"
+            className="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all"
             title="Clear chat"
           >
             <RotateCcw className="w-4 h-4" />
@@ -191,34 +191,36 @@ export default function MentorChat({ userProfile }: MentorChatProps) {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
         {messages.map((msg) => (
           <div
             key={msg.id}
             className={`flex gap-3 animate-fade-in ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
           >
             {/* Avatar */}
-            <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white ${
-              msg.role === "assistant" ? "bg-gradient-to-br from-primary to-purple-600" : "bg-gradient-to-br from-success to-emerald-600"
+            <div className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center text-white border ${
+              msg.role === "assistant"
+                ? "bg-gradient-to-br from-purple-600 to-indigo-600 border-purple-500/30 shadow-[0_0_15px_rgba(139,92,246,0.3)]"
+                : "bg-white/10 border-white/20"
             }`}>
               {msg.role === "assistant" ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
             </div>
 
             {/* Bubble */}
-            <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+            <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed border ${
               msg.role === "user"
-                ? "bg-primary text-primary-foreground rounded-tr-sm"
-                : "bg-muted text-foreground rounded-tl-sm"
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-500/30 rounded-tr-none shadow-[0_0_15px_rgba(139,92,246,0.3)]"
+                : "bg-white/5 border-white/10 text-gray-200 rounded-tl-none"
             }`}>
               {msg.role === "assistant" ? (
                 <div
-                  className="space-y-1 prose-sm max-w-none"
+                  className="space-y-1 prose-sm max-w-none text-gray-200"
                   dangerouslySetInnerHTML={{ __html: formatContent(msg.content) }}
                 />
               ) : (
                 <p>{msg.content}</p>
               )}
-              <p className={`text-[10px] mt-2 ${msg.role === "user" ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+              <p className={`text-[9px] mt-2 font-mono ${msg.role === "user" ? "text-purple-200/70 text-right" : "text-gray-500"}`}>
                 {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
               </p>
             </div>
@@ -227,14 +229,14 @@ export default function MentorChat({ userProfile }: MentorChatProps) {
 
         {loading && (
           <div className="flex gap-3 animate-fade-in">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center border border-purple-500/30 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
               <Bot className="w-4 h-4 text-white" />
             </div>
-            <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3">
+            <div className="bg-white/5 border border-white/10 rounded-2xl rounded-tl-none px-4 py-3">
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                <div className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+                <div className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+                <div className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
             </div>
           </div>
@@ -245,13 +247,16 @@ export default function MentorChat({ userProfile }: MentorChatProps) {
       {/* Starter prompts (only show if only welcome message) */}
       {messages.length === 1 && (
         <div className="px-6 pb-3">
-          <p className="text-xs text-muted-foreground mb-2 font-semibold uppercase tracking-wider">Quick Start</p>
+          <p className="text-[11px] text-gray-400 mb-2 font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-purple-400" />
+            Suggested Career Prompts
+          </p>
           <div className="flex flex-wrap gap-2">
             {STARTER_PROMPTS.map((prompt, i) => (
               <button
                 key={i}
                 onClick={() => sendMessage(prompt)}
-                className="text-xs px-3 py-1.5 bg-muted hover:bg-primary/10 hover:text-primary border border-border rounded-full transition-all duration-200 text-left"
+                className="text-xs px-3.5 py-2 bg-white/5 hover:bg-purple-600/20 hover:text-purple-300 hover:border-purple-500/40 border border-white/10 rounded-xl transition-all duration-200 text-left text-gray-300"
               >
                 {prompt}
               </button>
@@ -261,7 +266,7 @@ export default function MentorChat({ userProfile }: MentorChatProps) {
       )}
 
       {/* Input */}
-      <div className="px-6 pb-6 pt-2 border-t border-border bg-muted/20">
+      <div className="px-6 pb-6 pt-3 border-t border-white/10 bg-black/40 backdrop-blur-md">
         <div className="flex gap-3 items-end">
           <div className="flex-1 relative">
             <textarea
@@ -271,8 +276,8 @@ export default function MentorChat({ userProfile }: MentorChatProps) {
               onKeyDown={handleKeyDown}
               placeholder="Ask about career roadmaps, projects, courses, interview tips..."
               rows={1}
-              style={{ resize: "none", minHeight: "44px", maxHeight: "140px" }}
-              className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground text-sm transition-all leading-relaxed"
+              style={{ resize: "none", minHeight: "46px", maxHeight: "140px" }}
+              className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 focus:outline-none text-white text-sm transition-all leading-relaxed placeholder:text-gray-500 shadow-inner"
               disabled={loading}
               onInput={(e) => {
                 const el = e.currentTarget;
@@ -285,12 +290,12 @@ export default function MentorChat({ userProfile }: MentorChatProps) {
             onClick={() => sendMessage()}
             disabled={!input.trim() || loading}
             variant="gradient"
-            className="h-11 w-11 p-0 rounded-xl shrink-0"
+            className="h-11 w-11 p-0 rounded-xl shrink-0 shadow-[0_0_15px_rgba(139,92,246,0.4)]"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>
         </div>
-        <p className="text-[10px] text-muted-foreground mt-2 text-center">Press Enter to send · Shift+Enter for new line</p>
+        <p className="text-[10px] text-gray-500 mt-2 text-center">Press Enter to send · Shift+Enter for new line</p>
       </div>
     </div>
   );

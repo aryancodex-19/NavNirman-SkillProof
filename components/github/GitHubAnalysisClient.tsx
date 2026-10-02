@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
+import Image from "next/image";
 import { toast } from "sonner";
 import GitHubConnect from "@/components/github/GitHubConnect";
 import CommitActivity from "@/components/github/CommitActivity";
@@ -33,6 +34,34 @@ export default function GitHubAnalysisClient({
   );
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+
+  const runAnalysis = async () => {
+    setIsAnalyzing(true);
+    try {
+      const res = await fetch("/api/github/analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Analysis failed");
+        return;
+      }
+
+      setAnalysisData(data);
+      toast.success("GitHub analysis complete!");
+    } catch (err: any) {
+      toast.error(err.message || "Analysis failed");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleAnalyze = useCallback(async () => {
+    await runAnalysis();
+  }, []);
 
   // Auto-trigger analysis if connected but no data
   useEffect(() => {
@@ -90,34 +119,6 @@ export default function GitHubAnalysisClient({
     }
   }, []);
 
-  const runAnalysis = async () => {
-    setIsAnalyzing(true);
-    try {
-      const res = await fetch("/api/github/analysis", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error || "Analysis failed");
-        return;
-      }
-
-      setAnalysisData(data);
-      toast.success("GitHub analysis complete!");
-    } catch (err: any) {
-      toast.error(err.message || "Analysis failed");
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
-  const handleAnalyze = useCallback(async () => {
-    await runAnalysis();
-  }, []);
-
   // ── Not Connected State ──
   if (!isConnected) {
     return (
@@ -154,25 +155,28 @@ export default function GitHubAnalysisClient({
   return (
     <div className="space-y-6">
       {/* Connection status bar */}
-      <div className="flex items-center justify-between bg-white/[0.03] border border-white/5 rounded-2xl px-5 py-3">
+      <div className="flex items-center justify-between bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl px-5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
         <div className="flex items-center gap-3">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse" />
           <span className="text-sm text-gray-300 font-medium">
             Connected as{" "}
             <a
               href={`https://github.com/${username}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-indigo-400 hover:text-indigo-300 transition-colors font-semibold"
+              className="text-purple-400 hover:text-purple-300 transition-colors font-bold"
             >
               @{username}
             </a>
           </span>
           {analysisData.profile?.avatarUrl && (
-            <img
+            <Image
               src={analysisData.profile.avatarUrl}
               alt={username}
-              className="h-6 w-6 rounded-full border border-white/10"
+              width={24}
+              height={24}
+              unoptimized
+              className="h-6 w-6 rounded-full border border-purple-500/30"
             />
           )}
         </div>
@@ -180,7 +184,7 @@ export default function GitHubAnalysisClient({
           <button
             onClick={handleAnalyze}
             disabled={isAnalyzing}
-            className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors cursor-pointer disabled:opacity-50"
+            className="text-xs text-purple-400 hover:text-purple-300 font-semibold transition-colors cursor-pointer disabled:opacity-50"
           >
             {isAnalyzing ? "Analyzing..." : "Re-analyze"}
           </button>
@@ -238,15 +242,15 @@ function AnalyzingLoader({ username }: { username: string }) {
       setStep((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [steps.length]);
 
   return (
     <div className="flex flex-col items-center justify-center py-20 space-y-8">
       {/* Animated spinner */}
       <div className="relative">
         <div className="h-20 w-20 rounded-full border-4 border-white/5" />
-        <div className="absolute inset-0 h-20 w-20 rounded-full border-4 border-transparent border-t-indigo-500 animate-spin" />
-        <div className="absolute inset-2 h-16 w-16 rounded-full border-4 border-transparent border-t-violet-500 animate-spin [animation-direction:reverse] [animation-duration:1.5s]" />
+        <div className="absolute inset-0 h-20 w-20 rounded-full border-4 border-transparent border-t-purple-500 animate-spin" />
+        <div className="absolute inset-2 h-16 w-16 rounded-full border-4 border-transparent border-t-indigo-500 animate-spin [animation-direction:reverse] [animation-duration:1.5s]" />
       </div>
 
       <div className="text-center space-y-3">
@@ -261,7 +265,7 @@ function AnalyzingLoader({ username }: { username: string }) {
                 i < step
                   ? "text-emerald-400"
                   : i === step
-                  ? "text-indigo-400 animate-pulse"
+                  ? "text-purple-400 animate-pulse font-semibold"
                   : "text-gray-600"
               }`}
             >

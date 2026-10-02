@@ -22,6 +22,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Kilo Agent Manager worktrees (duplicate source trees, not linted here):
+    ".kilo/**",
   ]),
 ]);
 

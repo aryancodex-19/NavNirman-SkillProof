@@ -22,7 +22,10 @@ export default async function DashboardLayout({
       {/* Main content area — offset by sidebar width on desktop */}
       <div className="lg:pl-64 transition-all duration-300">
         <DashboardHeader />
-        <main className="p-6 lg:p-8">{children}</main>
+        <main className="p-6 lg:p-8 relative">
+          <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(147,51,234,0.07),transparent_60%)]" />
+          {children}
+        </main>
       </div>
     </div>
   );

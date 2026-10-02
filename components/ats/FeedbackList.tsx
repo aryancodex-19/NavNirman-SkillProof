@@ -16,10 +16,10 @@ export default function FeedbackList({ feedback, formattingIssues }: FeedbackLis
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Content Improvements */}
-      <Card className="border border-border bg-card shadow-lg hover:border-primary/20 transition-all duration-300">
-        <CardHeader className="border-b border-border/50 pb-4">
-          <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
+      <Card className="border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_8px_32px_rgba(139,92,246,0.12)] hover:border-purple-500/30 transition-all duration-300">
+        <CardHeader className="border-b border-white/10 pb-4">
+          <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-purple-400" />
             <span>AI Content Suggestions</span>
           </CardTitle>
         </CardHeader>
@@ -27,8 +27,8 @@ export default function FeedbackList({ feedback, formattingIssues }: FeedbackLis
           {hasFeedback ? (
             <ul className="space-y-4">
               {feedback.map((point, idx) => (
-                <li key={idx} className="flex items-start gap-3 text-xs leading-relaxed text-muted-foreground group">
-                  <span className="p-1 bg-primary/10 rounded-lg text-primary group-hover:scale-110 transition-transform shrink-0">
+                <li key={idx} className="flex items-start gap-3 text-xs leading-relaxed text-gray-300 group">
+                  <span className="p-1 bg-purple-500/10 border border-purple-500/20 rounded-lg text-purple-400 group-hover:scale-110 transition-transform shrink-0">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                   </span>
                   <span>{point}</span>
@@ -36,7 +36,7 @@ export default function FeedbackList({ feedback, formattingIssues }: FeedbackLis
               ))}
             </ul>
           ) : (
-            <p className="text-xs text-success font-semibold italic flex items-center gap-1.5 pt-2">
+            <p className="text-xs text-emerald-400 font-semibold italic flex items-center gap-1.5 pt-2">
               🎉 Your content structure looks highly optimized!
             </p>
           )}
@@ -44,10 +44,10 @@ export default function FeedbackList({ feedback, formattingIssues }: FeedbackLis
       </Card>
 
       {/* Formatting & Layout */}
-      <Card className="border border-border bg-card shadow-lg hover:border-primary/20 transition-all duration-300">
-        <CardHeader className="border-b border-border/50 pb-4">
-          <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
-            <FileText className="w-5 h-5 text-primary" />
+      <Card className="border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_8px_32px_rgba(139,92,246,0.12)] hover:border-purple-500/30 transition-all duration-300">
+        <CardHeader className="border-b border-white/10 pb-4">
+          <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
+            <FileText className="w-4 h-4 text-purple-400" />
             <span>Formatting & Layout Tips</span>
           </CardTitle>
         </CardHeader>
@@ -55,8 +55,8 @@ export default function FeedbackList({ feedback, formattingIssues }: FeedbackLis
           {hasFormatting ? (
             <ul className="space-y-4">
               {formattingIssues.map((issue, idx) => (
-                <li key={idx} className="flex items-start gap-3 text-xs leading-relaxed text-muted-foreground group">
-                  <span className="p-1 bg-secondary rounded-lg text-foreground group-hover:scale-110 transition-transform shrink-0">
+                <li key={idx} className="flex items-start gap-3 text-xs leading-relaxed text-gray-300 group">
+                  <span className="p-1 bg-white/5 border border-white/10 rounded-lg text-gray-300 group-hover:scale-110 transition-transform shrink-0">
                     <ChevronRight className="w-3.5 h-3.5" />
                   </span>
                   <span>{issue}</span>
@@ -64,7 +64,7 @@ export default function FeedbackList({ feedback, formattingIssues }: FeedbackLis
               ))}
             </ul>
           ) : (
-            <p className="text-xs text-success font-semibold italic flex items-center gap-1.5 pt-2">
+            <p className="text-xs text-emerald-400 font-semibold italic flex items-center gap-1.5 pt-2">
               🎉 No formatting or layout errors detected.
             </p>
           )}

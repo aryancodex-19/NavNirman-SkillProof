@@ -16,8 +16,8 @@ const TEMPLATES: Template[] = [
     id: "modern",
     name: "Modern Dark",
     description: "Brittany Chiang-inspired split layout. Sticky nav, floating cards, and cursor-following glow meshes.",
-    colors: "from-indigo-500 via-purple-600 to-pink-500",
-    accentText: "text-indigo-400",
+    colors: "from-purple-500 via-indigo-600 to-pink-500",
+    accentText: "text-purple-400",
   },
   {
     id: "minimal",
@@ -44,10 +44,10 @@ export default function TemplateSelector({ selected, onSelect }: TemplateSelecto
   return (
     <div className="space-y-4">
       <div>
-        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+        <label className="text-xs font-bold text-gray-300 uppercase tracking-wider block">
           Choose Presentation Template
         </label>
-        <p className="text-[11px] text-muted-foreground mt-0.5">
+        <p className="text-xs text-gray-400 mt-1">
           Each template is fully responsive, optimized for loading speeds, and includes interactive features.
         </p>
       </div>
@@ -60,19 +60,19 @@ export default function TemplateSelector({ selected, onSelect }: TemplateSelecto
               key={template.id}
               onClick={() => onSelect(template.id)}
               type="button"
-              className={`relative flex flex-col text-left rounded-2xl border-2 overflow-hidden transition-all duration-300 group cursor-pointer bg-zinc-950/45 ${
+              className={`relative flex flex-col text-left rounded-2xl border-2 overflow-hidden transition-all duration-300 group cursor-pointer bg-white/[0.02] backdrop-blur-md ${
                 isSelected
-                  ? "border-primary shadow-lg shadow-primary/20 scale-[1.02]"
-                  : "border-white/5 hover:border-white/15 hover:scale-[1.01]"
+                  ? "border-purple-500 shadow-[0_0_25px_rgba(139,92,246,0.3)] scale-[1.02] bg-purple-500/5"
+                  : "border-white/10 hover:border-purple-500/30 hover:bg-white/[0.04] hover:scale-[1.01]"
               }`}
             >
               {/* Mockup Preview Container */}
-              <div className="h-28 w-full bg-zinc-950/90 relative p-3 overflow-hidden flex items-center justify-center border-b border-white/5">
+              <div className="h-28 w-full bg-black/60 relative p-3 overflow-hidden flex items-center justify-center border-b border-white/10">
                 {/* 1. Modern Dark Split Mock */}
                 {template.id === "modern" && (
-                  <div className="w-full h-full flex gap-2 opacity-80">
+                  <div className="w-full h-full flex gap-2 opacity-85">
                     <div className="w-1/3 h-full border-r border-white/10 flex flex-col gap-1.5 p-1">
-                      <div className="h-2.5 w-6/7 bg-indigo-500/25 rounded" />
+                      <div className="h-2.5 w-6/7 bg-purple-500/40 rounded" />
                       <div className="h-1.5 w-full bg-white/10 rounded" />
                       <div className="flex gap-1 mt-auto">
                         <div className="h-3 w-3 bg-white/20 rounded-full" />
@@ -82,7 +82,7 @@ export default function TemplateSelector({ selected, onSelect }: TemplateSelecto
                     <div className="w-2/3 h-full flex flex-col gap-2 p-1 overflow-hidden">
                       <div className="h-1.5 w-2/3 bg-white/10 rounded" />
                       <div className="h-12 w-full bg-white/[0.03] border border-white/5 rounded-lg flex flex-col gap-1 p-1">
-                        <div className="h-1.5 w-1/2 bg-indigo-500/20 rounded" />
+                        <div className="h-1.5 w-1/2 bg-purple-500/30 rounded" />
                         <div className="h-1 w-full bg-white/5 rounded" />
                         <div className="h-1 w-4/5 bg-white/5 rounded" />
                       </div>
@@ -92,7 +92,7 @@ export default function TemplateSelector({ selected, onSelect }: TemplateSelecto
 
                 {/* 2. Clean Minimal Mock */}
                 {template.id === "minimal" && (
-                  <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 opacity-80 max-w-[140px]">
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 opacity-85 max-w-[140px]">
                     <div className="h-2.5 w-20 bg-white/25 rounded-full" />
                     <div className="h-1.5 w-24 bg-white/10 rounded-full" />
                     <div className="w-full h-px bg-white/10 my-1" />
@@ -111,17 +111,17 @@ export default function TemplateSelector({ selected, onSelect }: TemplateSelecto
 
                 {/* 3. Bold Cyberpunk Mock */}
                 {template.id === "bold" && (
-                  <div className="w-full h-full flex flex-col gap-2 p-1 opacity-80">
+                  <div className="w-full h-full flex flex-col gap-2 p-1 opacity-85">
                     <div className="flex items-center justify-between border-b border-cyan-500/25 pb-1">
                       <div className="h-2.5 w-12 bg-cyan-500/30 rounded" />
                       <div className="h-2 w-2 rounded-full bg-fuchsia-500 animate-pulse" />
                     </div>
                     <div className="grid grid-cols-2 gap-2 mt-0.5">
-                      <div className="h-9 border border-cyan-500/20 shadow-[0_0_8px_rgba(6,182,212,0.05)] rounded p-1 flex flex-col gap-1 bg-[#040406]">
+                      <div className="h-9 border border-cyan-500/20 shadow-[0_0_8px_rgba(6,182,212,0.1)] rounded p-1 flex flex-col gap-1 bg-[#040406]">
                         <div className="h-1.5 w-3/4 bg-fuchsia-500/30 rounded" />
                         <div className="h-1 w-full bg-white/10 rounded" />
                       </div>
-                      <div className="h-9 border border-fuchsia-500/20 shadow-[0_0_8px_rgba(217,70,239,0.05)] rounded p-1 flex flex-col gap-1 bg-[#040406]">
+                      <div className="h-9 border border-fuchsia-500/20 shadow-[0_0_8px_rgba(217,70,239,0.1)] rounded p-1 flex flex-col gap-1 bg-[#040406]">
                         <div className="h-1.5 w-3/4 bg-cyan-500/30 rounded" />
                         <div className="h-1 w-full bg-white/10 rounded" />
                       </div>
@@ -131,13 +131,13 @@ export default function TemplateSelector({ selected, onSelect }: TemplateSelecto
 
                 {/* Selected Check overlay */}
                 {isSelected && (
-                  <div className="absolute top-2 right-2 bg-primary rounded-full p-0.5 z-10 shadow-md">
+                  <div className="absolute top-2 right-2 bg-purple-600 rounded-full p-0.5 z-10 shadow-[0_0_10px_rgba(139,92,246,0.8)]">
                     <CheckCircle className="w-3.5 h-3.5 text-white" />
                   </div>
                 )}
 
-                {/* Cyberpunk grid background lines */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:10px_10px] pointer-events-none" />
+                {/* Grid background lines */}
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:10px_10px] pointer-events-none" />
               </div>
 
               {/* Label & Description */}
@@ -145,15 +145,15 @@ export default function TemplateSelector({ selected, onSelect }: TemplateSelecto
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className={`h-2 w-2 rounded-full bg-gradient-to-r ${template.colors}`} />
-                    <p className="font-bold text-foreground text-xs">{template.name}</p>
+                    <p className="font-bold text-white text-xs">{template.name}</p>
                   </div>
-                  <p className="text-[10px] text-muted-foreground leading-relaxed mt-1.5">
+                  <p className="text-[11px] text-gray-400 leading-relaxed mt-1.5">
                     {template.description}
                   </p>
                 </div>
                 
-                <span className={`text-[9px] font-bold mt-2.5 block ${template.accentText}`}>
-                  Active Accents
+                <span className={`text-[10px] font-bold mt-2.5 block ${template.accentText}`}>
+                  Active Aesthetic
                 </span>
               </div>
             </button>
