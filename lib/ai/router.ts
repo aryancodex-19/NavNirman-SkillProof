@@ -20,7 +20,7 @@ export async function routeAI(task: TaskType, input: any) {
         case "parse_resume":
             // Gemini 2.5 Flash - 1M context, can read PDFs directly
             const model = gemini.getGenerativeModel({
-                model: "gemini-2.5-flash"  // Updated: 2.5 Flash is current [citation:4]
+                model: "gemini-3.8-flash"  // Updated: 2.5 Flash is current [citation:4]
             });
             return await model.generateContent(input);
 
@@ -45,7 +45,7 @@ export async function routeAI(task: TaskType, input: any) {
         case "portfolio_generate":
             // Gemini for structured HTML generation
             const geminiModel = gemini.getGenerativeModel({
-                model: "gemini-2.5-flash-lite",  // Cheaper, $0.40/MTok output [citation:4]
+                model: "gemini-3.8-flash",  // Cheaper, $0.40/MTok output [citation:4]
                 generationConfig: { responseMimeType: "application/json" }
             });
             return await geminiModel.generateContent(input);
@@ -58,3 +58,4 @@ export async function routeAI(task: TaskType, input: any) {
             });
     }
 }
+

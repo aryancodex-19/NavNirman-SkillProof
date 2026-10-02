@@ -17,7 +17,7 @@ export async function generateContent(prompt: string, systemInstruction?: string
   }
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",  // ✅ Updated to Gemini 2.0 Flash
+    model: "gemini-3.8-flash",  // ✅ Updated to Gemini 2.0 Flash
     systemInstruction,
   });
 
@@ -38,7 +38,7 @@ export async function generateContentFromParts(
   }
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",  // ✅ Updated to Gemini 2.0 Flash
+    model: "gemini-3.8-flash",  // ✅ Updated to Gemini 2.0 Flash
     systemInstruction,
     generationConfig: responseMimeType ? { responseMimeType } : undefined,
   });
@@ -46,3 +46,4 @@ export async function generateContentFromParts(
   const result = await model.generateContent(parts);
   return result.response.text();
 }
+
