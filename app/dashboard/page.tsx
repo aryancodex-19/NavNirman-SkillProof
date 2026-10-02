@@ -85,6 +85,13 @@ const MODULES = [
     iconName: "GitGraph",
     href: "/dashboard/github",
   },
+  {
+    title: "SkillProof",
+    description: "Verify resume claims against public GitHub evidence and compare them to real job requirements.",
+    status: "active" as const,
+    iconName: "ShieldCheck",
+    href: "/dashboard/skillproof",
+  },
 ];
 
 export default async function DashboardPage() {
@@ -156,6 +163,7 @@ export default async function DashboardPage() {
     if (title === "Coding Tracker") return maxStreak > 0 ? `Streak: ${maxStreak}d` : "Track DSA";
     if (title === "LinkedIn Optimizer") return dbUser?.linkedinUrl ? "LinkedIn Linked" : "Not Linked";
     if (title === "GitHub Deep Analysis") return githubScore !== null && githubScore !== undefined ? `Score: ${githubScore}/100` : "Audit Profile";
+    if (title === "SkillProof") return dbUser?.githubUrl ? "Evidence Ready" : "Verify Skills";
     return undefined;
   };
 

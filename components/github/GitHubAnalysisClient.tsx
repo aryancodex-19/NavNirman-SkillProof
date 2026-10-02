@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import GitHubConnect from "@/components/github/GitHubConnect";
@@ -34,6 +34,7 @@ export default function GitHubAnalysisClient({
   );
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const autoAnalysisStarted = useRef(false);
 
   const runAnalysis = useCallback(async () => {
     setIsAnalyzing(true);
@@ -63,13 +64,6 @@ export default function GitHubAnalysisClient({
     await runAnalysis();
   }, [runAnalysis]);
 
-  // Auto-trigger analysis if connected but no data
-  useEffect(() => {
-    if (isConnected && !analysisData && !isAnalyzing) {
-      handleAnalyze();
-    }
-  }, [isConnected, analysisData, isAnalyzing, handleAnalyze]);
-
   const handleConnect = useCallback(
     async (enteredUsername: string, token?: string) => {
       setIsConnecting(true);
@@ -89,6 +83,7 @@ export default function GitHubAnalysisClient({
 
         setUsername(data.username);
         setIsConnected(true);
+        autoAnalysisStarted.current = true;
         toast.success(`Connected to GitHub as ${data.username}`);
 
         // Auto-trigger analysis
@@ -117,6 +112,18 @@ export default function GitHubAnalysisClient({
       toast.error(err.message || "Disconnect failed");
     }
   }, []);
+
+  useEffect(() => {
+    if (!isConnected) {
+      autoAnalysisStarted.current = false;
+      return;
+    }
+
+    if (!analysisData && !isAnalyzing && !autoAnalysisStarted.current) {
+      autoAnalysisStarted.current = true;
+      void handleAnalyze();
+    }
+  }, [analysisData, handleAnalyze, isAnalyzing, isConnected]);
 
   // ── Not Connected State ──
   if (!isConnected) {
