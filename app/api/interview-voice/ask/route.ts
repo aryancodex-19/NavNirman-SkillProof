@@ -68,7 +68,7 @@ Return ONLY valid JSON in this EXACT format (no markdown, no extra text):
 }`;
 
     const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       messages: [
         { role: "system", content: systemPrompt },
         {
@@ -122,3 +122,4 @@ Return ONLY valid JSON in this EXACT format (no markdown, no extra text):
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

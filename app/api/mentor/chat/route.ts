@@ -93,7 +93,7 @@ Guidelines:
 - Always end with a follow-up question to keep the conversation going`;
 
     const response = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       messages: [
         { role: "system", content: systemPrompt },
         ...messages.map((m: any) => ({ role: m.role, content: m.content })),
@@ -138,3 +138,4 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
