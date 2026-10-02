@@ -6,8 +6,34 @@ import {
   isTransientError,
   extractTextFromPdfBuffer,
   extractSkillsFromText,
+  GROQ_PRIMARY_MODEL,
+  GROQ_FALLBACK_MODEL,
 } from "@/lib/ai/gemini";
 import Groq from "groq-sdk";
+// pdf-parse is a CommonJS module — use require() to avoid TS1192
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pdfParse: (buf: Buffer, opts?: any) => Promise<{ text: string; numpages: number }> =
+  require("pdf-parse");
+
+/**
+ * Extracts readable text from a PDF buffer using pdf-parse (primary) with
+ * our custom extractTextFromPdfBuffer as a secondary fallback.
+ */
+async function robustExtractPdfText(buffer: Buffer): Promise<string> {
+  // Primary: pdf-parse (handles standard text-selectable PDFs much better)
+  try {
+    const data = await pdfParse(buffer, { max: 0 } as any);
+    if (data.text && data.text.trim().length > 50) {
+      return data.text.trim();
+    }
+  } catch {
+    // pdf-parse failed – fall through to secondary
+  }
+
+  // Secondary: custom stream extractor (handles some edge-case PDF formats)
+  const customText = extractTextFromPdfBuffer(buffer);
+  return customText;
+}
 
 export const maxDuration = 60;
 
@@ -38,13 +64,124 @@ Return ONLY valid JSON with this exact schema (no markdown fences, no extra text
 }
 
 Rules:
-- Extract ALL technical skills, languages, libraries, databases, DevOps tools, and platforms mentioned anywhere in the resume.
-- skills should be individual skill names (e.g. "React", "TypeScript", "Python", "Docker", "SQL"), not lengthy phrases.
+- Extract ALL technical skills, languages, libraries, databases, DevOps tools, engineering concepts (OOP, Data Structures, Algorithms, Testing), and developer platforms (VS Code, Figma, Docker, Git) mentioned anywhere in the resume.
+- skills should be individual skill names (e.g. "Java", "Python", "OOP", "AI/ML", "VS Code", "Figma", "React", "Docker"), not lengthy phrases.
 - If skills are grouped in categories (e.g. Languages, Frameworks, Tools), combine them into a single flat array of strings.
 - Extract ALL experiences and education entries found.
 - For bullets, use the actual accomplishment text from the resume.
 - If a field is not found, use an empty string or empty array.
 - Do NOT wrap the response in markdown code fences.`;
+
+export const CANONICAL_SKILL_MAP: Record<string, string> = {
+  react: "React",
+  "react.js": "React",
+  reactjs: "React",
+  "next.js": "Next.js",
+  nextjs: "Next.js",
+  vue: "Vue.js",
+  "vue.js": "Vue.js",
+  vuejs: "Vue.js",
+  node: "Node.js",
+  "node.js": "Node.js",
+  nodejs: "Node.js",
+  express: "Express.js",
+  "express.js": "Express.js",
+  expressjs: "Express.js",
+  javascript: "JavaScript",
+  js: "JavaScript",
+  typescript: "TypeScript",
+  ts: "TypeScript",
+  python: "Python",
+  py: "Python",
+  java: "Java",
+  "c++": "C++",
+  cpp: "C++",
+  cplusplus: "C++",
+  "c#": "C#",
+  csharp: "C#",
+  c: "C",
+  ".net": ".NET",
+  dotnet: ".NET",
+  "net core": ".NET",
+  "asp.net": ".NET",
+  go: "Go",
+  golang: "Go",
+  rust: "Rust",
+  ruby: "Ruby",
+  php: "PHP",
+  swift: "Swift",
+  kotlin: "Kotlin",
+  dart: "Dart",
+  scala: "Scala",
+  r: "R",
+  sql: "SQL",
+  html: "HTML",
+  html5: "HTML",
+  css: "CSS",
+  css3: "CSS",
+  tailwind: "Tailwind CSS",
+  "tailwind css": "Tailwind CSS",
+  tailwindcss: "Tailwind CSS",
+  bootstrap: "Bootstrap",
+  redux: "Redux",
+  zustand: "Zustand",
+  graphql: "GraphQL",
+  "rest api": "REST API",
+  "restful api": "REST API",
+  "restful apis": "REST API",
+  apis: "REST API",
+  "api development": "API Development",
+  docker: "Docker",
+  kubernetes: "Kubernetes",
+  k8s: "Kubernetes",
+  aws: "AWS",
+  "amazon web services": "AWS",
+  gcp: "GCP",
+  "google cloud": "GCP",
+  "google cloud platform": "GCP",
+  azure: "Azure",
+  "microsoft azure": "Azure",
+  "ci/cd": "CI/CD",
+  "github actions": "GitHub Actions",
+  git: "Git",
+  github: "GitHub",
+  gitlab: "GitLab",
+  linux: "Linux",
+  terraform: "Terraform",
+  postgresql: "PostgreSQL",
+  postgres: "PostgreSQL",
+  mysql: "MySQL",
+  mongodb: "MongoDB",
+  redis: "Redis",
+  sqlite: "SQLite",
+  prisma: "Prisma",
+  supabase: "Supabase",
+  firebase: "Firebase",
+  oop: "OOP",
+  oops: "OOP",
+  "object-oriented programming": "OOP",
+  "object oriented programming": "OOP",
+  "ai/ml": "AI/ML",
+  "ai & ml": "AI/ML",
+  "ai / ml": "AI/ML",
+  "machine learning": "Machine Learning",
+  "deep learning": "Deep Learning",
+  "data analysis": "Data Analysis",
+  "data science": "Data Science",
+  "artificial intelligence": "AI/ML",
+  "vs code": "VS Code",
+  vscode: "VS Code",
+  "visual studio code": "VS Code",
+  figma: "Figma",
+  "data structures": "Data Structures",
+  algorithms: "Algorithms",
+  testing: "Testing",
+  "unit testing": "Testing",
+  "integration testing": "Testing",
+  tdd: "Testing",
+  flutter: "Flutter",
+  "react native": "React Native",
+};
 
 /**
  * Normalizes skills from various LLM output formats (arrays, category objects, comma-separated strings)
@@ -53,14 +190,20 @@ Rules:
 export function normalizeExtractedSkills(rawSkills: any, otherData?: any, rawText?: string): string[] {
   const skillsSet = new Set<string>();
 
+  function canonicalize(skillName: string): string {
+    const trimmed = skillName.trim().replace(/^[-*•]\s*/, "");
+    if (!trimmed) return "";
+    const lower = trimmed.toLowerCase();
+    return CANONICAL_SKILL_MAP[lower] || trimmed;
+  }
+
   function addSkill(s: any) {
     if (typeof s === "string") {
-      // Split on commas, semicolons, or slashes if LLM returned comma-separated string
       const pieces = s.split(/[,;•|]/);
       for (const piece of pieces) {
-        const cleaned = piece.trim().replace(/^[-*•]\s*/, "");
-        if (cleaned.length > 0 && cleaned.length < 50) {
-          skillsSet.add(cleaned);
+        const canonical = canonicalize(piece);
+        if (canonical.length > 0 && canonical.length < 50) {
+          skillsSet.add(canonical);
         }
       }
     } else if (s && typeof s === "object") {
@@ -70,11 +213,10 @@ export function normalizeExtractedSkills(rawSkills: any, otherData?: any, rawTex
     }
   }
 
-  // 1. Process rawSkills
+  // 1. Process rawSkills from AI or input
   if (Array.isArray(rawSkills)) {
     rawSkills.forEach(addSkill);
   } else if (rawSkills && typeof rawSkills === "object") {
-    // LLM returned categorized object: { languages: [...], frameworks: [...] }
     Object.values(rawSkills).forEach((val) => {
       if (Array.isArray(val)) {
         val.forEach(addSkill);
@@ -86,7 +228,7 @@ export function normalizeExtractedSkills(rawSkills: any, otherData?: any, rawTex
     addSkill(rawSkills);
   }
 
-  // 2. Safety Net: If skills list is sparse, scan summary, experience, and raw text
+  // 2. Safety Net: Deterministic text scan across summary, experience, and raw text
   const textCorpusParts: string[] = [];
   if (typeof otherData?.summary === "string") textCorpusParts.push(otherData.summary);
   if (Array.isArray(otherData?.experience)) {
@@ -99,7 +241,7 @@ export function normalizeExtractedSkills(rawSkills: any, otherData?: any, rawTex
 
   if (textCorpusParts.length > 0) {
     const scanned = extractSkillsFromText(textCorpusParts.join(" "));
-    scanned.forEach((s) => skillsSet.add(s));
+    scanned.forEach((s) => skillsSet.add(canonicalize(s)));
   }
 
   // 3. Deduplicate case-insensitively while preserving standard title casing
@@ -142,101 +284,126 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
     const base64Data = buffer.toString("base64");
 
-    // Extract text from PDF buffer early for verification and safety baseline
-    const extractedText = extractTextFromPdfBuffer(buffer);
+    // Extract text from PDF buffer — pdf-parse primary, custom fallback
+    const extractedText = await robustExtractPdfText(buffer);
     console.log(`[Resume Parse API] Extracted text length: ${extractedText.length} characters`);
+
+    // Detect image-only / scanned PDFs: need at least 80 real word characters
+    const wordCharCount = extractedText.replace(/[^a-zA-Z]/g, "").length;
+    if (wordCharCount < 80) {
+      return NextResponse.json(
+        {
+          error:
+            "This PDF appears to be image-based (e.g. exported from Canva or a design tool) and contains no selectable text. " +
+            "Please re-save your resume from Microsoft Word, Google Docs, or a text-based PDF editor, then upload again.",
+        },
+        { status: 422 }
+      );
+    }
 
     let rawResponse = "";
     let parsingProvider = "gemini";
 
     // 1. Primary Attempt: Gemini with bounded retries
-    try {
-      const parts = [
-        {
-          inlineData: {
-            mimeType: "application/pdf",
-            data: base64Data,
-          },
-        },
-        {
-          text: "Parse this resume PDF and extract all structured data. Return ONLY the JSON object as specified in your instructions.",
-        },
-      ];
+    let aiSucceeded = false;
 
-      rawResponse = await generateContentFromParts(
-        parts,
-        PARSE_SYSTEM_INSTRUCTION,
-        "application/json"
-      );
-    } catch (geminiErr: any) {
-      console.warn("[Resume Parse API] Primary Gemini parser error:", geminiErr?.message || geminiErr);
-
-      if (!isTransientError(geminiErr) && process.env.GEMINI_API_KEY) {
-        throw geminiErr;
-      }
-
-      // 2. Secondary Fallback: Groq on extracted PDF text
-      const groqApiKey = process.env.GROQ_API_KEY;
-      if (!groqApiKey) {
-        return NextResponse.json(
+    if (process.env.GEMINI_API_KEY) {
+      try {
+        const parts = [
           {
-            error:
-              "The AI resume parser is temporarily unavailable due to high demand. Please try again in a few moments.",
+            inlineData: {
+              mimeType: "application/pdf",
+              data: base64Data,
+            },
           },
-          { status: 503 }
+          {
+            text: "Parse this resume PDF and extract all structured data. Return ONLY the JSON object as specified in your instructions.",
+          },
+        ];
+
+        rawResponse = await generateContentFromParts(
+          parts,
+          PARSE_SYSTEM_INSTRUCTION,
+          "application/json"
         );
+        aiSucceeded = true;
+      } catch (geminiErr: any) {
+        console.warn("[Resume Parse API] Primary Gemini parser error:", geminiErr?.message || geminiErr);
       }
-
-      console.warn("[Resume Parse API] Attempting Groq fallback for resume parsing...");
-
-      if (!extractedText || extractedText.trim().length < 15) {
-        console.error("[Resume Parse API] PDF text extraction failed: no extractable text streams found.");
-        return NextResponse.json(
-          {
-            error:
-              "PDF text extraction failed: The uploaded file appears to be a scanned image or contains unreadable text. Please upload a text-selectable PDF.",
-          },
-          { status: 422 }
-        );
-      }
-
-      const groq = new Groq({ apiKey: groqApiKey });
-      const groqCompletion = await groq.chat.completions.create({
-        model: "openai/gpt-oss-120b",
-        messages: [
-          { role: "system", content: PARSE_SYSTEM_INSTRUCTION },
-          {
-            role: "user",
-            content: `Parse this resume text and extract all structured data according to the schema:\n\n${extractedText}`,
-          },
-        ],
-        temperature: 0.1,
-        response_format: { type: "json_object" },
-      });
-
-      rawResponse = groqCompletion.choices[0]?.message?.content || "";
-      parsingProvider = "groq";
     }
 
-    console.log(`[Resume Parse API] Raw response received via ${parsingProvider}, length: ${rawResponse.length}`);
+    // 2. Secondary Fallback: Groq on extracted PDF text
+    if (!aiSucceeded && process.env.GROQ_API_KEY) {
+      try {
+        console.warn("[Resume Parse API] Attempting Groq fallback for resume parsing...");
+        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+        // Truncate to avoid context-window overflow that causes empty model output
+        const truncatedText = extractedText.slice(0, 14000);
+        const groqMessages = [
+          { role: "system" as const, content: PARSE_SYSTEM_INSTRUCTION },
+          {
+            role: "user" as const,
+            content: `Parse this resume text and extract all structured data according to the schema:\n\n${truncatedText}`,
+          },
+        ];
 
-    // Parse the AI response
+        for (const model of [GROQ_PRIMARY_MODEL, GROQ_FALLBACK_MODEL]) {
+          try {
+            const groqCompletion = await groq.chat.completions.create({
+              model,
+              messages: groqMessages,
+              temperature: 0.1,
+              response_format: { type: "json_object" },
+            });
+            const content = groqCompletion.choices[0]?.message?.content;
+            if (content) {
+              rawResponse = content;
+              parsingProvider = `groq:${model}`;
+              aiSucceeded = true;
+              break;
+            }
+            console.warn(`[Resume Parse API] Groq model ${model} returned empty content, trying fallback model...`);
+          } catch (modelErr: any) {
+            console.warn(`[Resume Parse API] Groq model ${model} error: ${modelErr?.message}`);
+            if (model === GROQ_FALLBACK_MODEL) {
+              console.error("[Resume Parse API] Both Groq models failed.");
+            }
+          }
+        }
+      } catch (groqErr) {
+        console.error("[Resume Parse API] Groq fallback failed:", groqErr);
+      }
+    }
+
+    // Parse the AI response if AI succeeded
     let parsedData: any = {};
-    try {
-      const cleaned = rawResponse
-        .replace(/```json\s*/gi, "")
-        .replace(/```\s*/g, "")
-        .trim();
-      parsedData = JSON.parse(cleaned);
-    } catch (parseErr) {
-      console.error("[Resume Parse API] Failed to parse AI response as JSON. Falling back to text scanner.");
-      // Fall back gracefully to structured extraction directly from extracted text
+    if (aiSucceeded && rawResponse) {
+      try {
+        const cleaned = rawResponse
+          .replace(/```json\s*/gi, "")
+          .replace(/```\s*/g, "")
+          .trim();
+        parsedData = JSON.parse(cleaned);
+      } catch (parseErr) {
+        console.error("[Resume Parse API] Failed to parse AI JSON. Utilizing deterministic parser.");
+      }
+    }
+
+    // If AI failed or produced no structured data, utilize deterministic fallback extraction directly from text
+    if (!parsedData || (!parsedData.fullName && !parsedData.skills)) {
+      parsingProvider = "deterministic-fallback";
+      const lines = extractedText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      const emailMatch = extractedText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+      const phoneMatch = extractedText.match(/(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/);
+
       parsedData = {
-        fullName: "",
-        summary: "",
+        fullName: lines[0] && lines[0].length < 50 ? lines[0] : "",
+        email: emailMatch ? emailMatch[0] : "",
+        phone: phoneMatch ? phoneMatch[0] : "",
+        summary: lines.slice(1, 4).join(" "),
         experience: [],
         education: [],
-        skills: [],
+        skills: extractSkillsFromText(extractedText),
       };
     }
 
